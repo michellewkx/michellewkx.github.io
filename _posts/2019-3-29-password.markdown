@@ -100,7 +100,7 @@ MD5("The quick brown fox jumps over the lazy cog")
 1.客户端提交 md5(password) 密码，服务端数据库通过md5(salt+md5(password)) 的规则存储密码，该 salt 仅存储在服务端，且在每次存储密码时都随机生成。这样即使被拖库，制作字典的成本也非常高。
 2.密码被 md5() 提交到服务端之后，可通过 md5(salt + form['password']) 与数据库密码比对。此方法可以在避免明文存储密码的前提下，实现密码加密提交与验证。
 ```
-这篇文章就到此结束了，如有疏忽的地方请指教，那就祝大家鸡年大吉吧！
+这篇文章就到此结束了，如有疏忽的地方请指教~
 
 资料来源：
 [维基百科RSA加密算法](https://zh.wikipedia.org/wiki/RSA%E5%8A%A0%E5%AF%86%E6%BC%94%E7%AE%97%E6%B3%95#.E5.85.AC.E9.92.A5.E4.B8.8E.E7.A7.81.E9.92.A5.E7.9A.84.E4.BA.A7.E7.94.9F)
