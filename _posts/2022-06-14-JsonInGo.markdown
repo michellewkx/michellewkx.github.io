@@ -182,6 +182,7 @@ result== []byte(`{"Name":"EasyToGo","Body":"Hello World","Time":1294706395881547
 ```shell
 func Unmarshal(data []byte, v interface{}) error
 ```
+
 与执行过程确定的序列化相比，反序列化的过程是逐渐探索的过程，所以会复杂很多，开销也会高出几倍。因为反序列化的使用相对比较繁琐，所以需要传入一个变量帮助标准库进行反序列化：
 ```shell
 //创建存储解码数据的变量
