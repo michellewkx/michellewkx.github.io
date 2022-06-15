@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="keyword"  content="">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>GO-序列化之Json - 王珂欣 | michellewkx</title>
+
+    <link rel="canonical" href="http://localhost:4000/2022/05/30/JsonInGo/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Github CSS -->
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="http://cdn.staticfile.org/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Michelle Daily</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/about/">About</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/tags/">Tags</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Image to hack wechat -->
+<!-- <img src="/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="/img/post-bg-2015.jpg" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/post-bg-2015.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/#生活" title="生活">生活</a>
+                        
+                    </div>
+                    <h1>GO-序列化之Json</h1>
+                    
+                    
+                    <h2 class="subheading">序列化--Json</h2>
+                    
+                    <span class="meta">Posted by Michelle on May 30, 2022</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+				<h1 id="json">JSON</h1>
+
+<p>JSON是一种简单的数据交换格式，它最常用于在浏览器中运行的Web后端和JavaScript程序之间的通信，是日常开发中使用最多的数据交换格式之一。
+几乎所有现代编程语言都会对JSON的序列化方法内置于标准库中，Go也不例外。</p>
+
+<h2 id="go语言中的json">GO语言中的JSON</h2>
+<p>Go语言通过encoding/json 对外提供标准的 JSON 序列化和反序列化方法，其中最常用的是 encoding/json.Marshal 和 encoding/json.Unmarshal。</p>
+
+<p>JSON 反序列化的开销是序列化开销的好几倍，这是由于Go 语言中的 JSON
+序列化过程不需要被序列化的对象预先实现任何接口，它会通过反射获取结构体或者数组中的值并以树形的结构递归地进行编码，标准库也会根据 encoding/json.Unmarshal 中传入的值对
+JSON 进行解码。</p>
+
+<p>同时Go 语言 JSON 标准库编码和解码的过程大量地运用了反射这一特性。
+我们先来简单介绍一下 JSON 标准库中的接口和标签，这两个特性可以让我们实现编码/解码的定制化。</p>
+<h3 id="标签">标签</h3>
+<p>在默认情况下，当我们在序列化和反序列化结构体时，标准库都会认为字段名和 JSON 中的键具有一一对应的关系，所以我们会使用标签这一特性，直接建立键与字段之间的映射关系。</p>
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">type </span>Author struct <span class="o">{</span>
+    Name string <span class="sb">`</span>json:<span class="s2">"name,omitempty"</span><span class="sb">`</span>
+    Age  int32  <span class="sb">`</span>json:<span class="s2">"age,string,omitempty"</span><span class="sb">`</span>
+    Salary int32 <span class="sb">`</span>json:<span class="s2">"-"</span><span class="sb">`</span>
+<span class="o">}</span>
+</code></pre></div></div>
+<p>1.字段命名：默认json中的key与字段名一致，可以通过<code class="highlighter-rouge">json:"key名称"</code> 来指定。</p>
+
+<p>2.string标签：表示当前的整数或者浮点数是由 JSON 中的字符串表示的。</p>
+
+<p>3.omitempty标签：在字段为空值时，直接在生成的 JSON 中忽略对应的键值对，例如：”age”: 0、”author”: “” 等。</p>
+
+<p>4.忽略字段：使用<code class="highlighter-rouge">json:"-"</code>指定字段不参与序列化。</p>
+
+<p>标准库会使用如下所示的 encoding/json.parseTag 来解析标签，我们可以看出，
+标签名和标签选项都以逗号连接，最前面的字符串为标签名，后面的都是标签选项</p>
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>func parseTag<span class="o">(</span>tag string<span class="o">)</span> <span class="o">(</span>string, tagOptions<span class="o">)</span> <span class="o">{</span>
+	<span class="k">if </span>idx :<span class="o">=</span> strings.Index<span class="o">(</span>tag, <span class="s2">","</span><span class="o">)</span><span class="p">;</span> idx <span class="o">!=</span> <span class="nt">-1</span> <span class="o">{</span>
+		<span class="k">return </span>tag[:idx], tagOptions<span class="o">(</span>tag[idx+1:]<span class="o">)</span>
+	<span class="o">}</span>
+	<span class="k">return </span>tag, tagOptions<span class="o">(</span><span class="s2">""</span><span class="o">)</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="接口">接口</h3>
+<h4 id="marshaler和unmarshaler接口">Marshaler和Unmarshaler接口</h4>
+<p>在 JSON 序列化和反序列化的过程中，它会使用反射判断结构体类型是否实现了上述接口，如果实现了上述接口就会优先使用对应的方法进行编码和解码操作。</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">type </span>Marshaler interface <span class="o">{</span>
+	MarshalJSON<span class="o">()</span> <span class="o">([]</span>byte, error<span class="o">)</span>
+<span class="o">}</span>
+
+<span class="nb">type </span>Unmarshaler interface <span class="o">{</span>
+	UnmarshalJSON<span class="o">([]</span>byte<span class="o">)</span> error
+<span class="o">}</span>
+</code></pre></div></div>
+<p>下面是一个示例，我们通过实现Marshaler和Unmarshaler对时间进行自定义的编码/解码。</p>
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>package json_test
+
+import <span class="o">(</span>
+	<span class="s2">"encoding/json"</span>
+	<span class="s2">"fmt"</span>
+	<span class="s2">"time"</span>
+<span class="o">)</span>
+
+<span class="nb">type </span>MyTime time.Time
+
+<span class="nb">type </span>Data struct <span class="o">{</span>
+	Id         int    <span class="sb">`</span>json:<span class="s2">",string"</span><span class="sb">`</span>
+	Name       string <span class="sb">`</span>json:<span class="s2">"name"</span><span class="sb">`</span>
+	PrivateKey string <span class="sb">`</span>json:<span class="s2">"-"</span><span class="sb">`</span>
+	Option1    string <span class="sb">`</span>json:<span class="s2">",omitempty"</span><span class="sb">`</span>
+	Option2    string <span class="sb">`</span>json:<span class="s2">",omitempty"</span><span class="sb">`</span>
+	Option3    string <span class="sb">`</span>json:<span class="s2">"op3,omitempty"</span><span class="sb">`</span>
+	Time       MyTime
+<span class="o">}</span>
+
+var dateFormat <span class="o">=</span> <span class="sb">`</span><span class="s2">"</span><span class="sb">`</span> + <span class="s2">"2006年01月02日 15:04:05"</span> + <span class="sb">`</span><span class="s2">"</span><span class="sb">`</span>
+
+func <span class="o">(</span>t MyTime<span class="o">)</span> MarshalJSON<span class="o">()</span> <span class="o">([]</span>byte, error<span class="o">)</span> <span class="o">{</span>
+	<span class="k">return</span> <span class="o">[]</span>byte<span class="o">(</span>time.Time<span class="o">(</span>t<span class="o">)</span>.Format<span class="o">(</span>dateFormat<span class="o">))</span>, nil
+<span class="o">}</span>
+
+func <span class="o">(</span>t <span class="k">*</span>MyTime<span class="o">)</span> UnmarshalJSON<span class="o">(</span>b <span class="o">[]</span>byte<span class="o">)</span> error <span class="o">{</span>
+	temp, err :<span class="o">=</span> time.Parse<span class="o">(</span>dateFormat, string<span class="o">(</span>b<span class="o">))</span>
+	<span class="k">if </span>err <span class="o">!=</span> nil <span class="o">{</span>
+		<span class="k">return </span>err
+	<span class="o">}</span>
+	<span class="k">*</span>t <span class="o">=</span> MyTime<span class="o">(</span>temp<span class="o">)</span>
+	<span class="k">return </span>nil
+<span class="o">}</span>
+
+func main<span class="o">()</span> <span class="o">{</span>
+	data :<span class="o">=</span> &amp;Data<span class="o">{</span>
+		Id:         123,
+		Name:       <span class="s2">"aaa"</span>,
+		PrivateKey: <span class="s2">"pk"</span>,
+		Option1:    <span class="s2">"op111"</span>,
+		Option3:    <span class="s2">""</span>,
+		Time:       MyTime<span class="o">(</span>time.Now<span class="o">())</span>,
+	<span class="o">}</span>
+	b, err :<span class="o">=</span> json.Marshal<span class="o">(</span>data<span class="o">)</span>
+	<span class="k">if </span>err <span class="o">!=</span> nil <span class="o">{</span>
+		panic<span class="o">(</span>err<span class="o">)</span>
+	<span class="o">}</span>
+	fmt.Println<span class="o">(</span><span class="s2">"Marshal: "</span>, string<span class="o">(</span>b<span class="o">))</span>
+	var newData Data
+	<span class="k">if </span>err :<span class="o">=</span> json.Unmarshal<span class="o">(</span>b, &amp;newData<span class="o">)</span><span class="p">;</span> err <span class="o">!=</span> nil <span class="o">{</span>
+		panic<span class="o">(</span>err<span class="o">)</span>
+	<span class="o">}</span>
+	fmt.Printf<span class="o">(</span><span class="s2">"Unmarshal: %+v</span><span class="se">\n</span><span class="s2">"</span>, newData<span class="o">)</span>
+<span class="o">}</span>
+</code></pre></div></div>
+<p>输出：</p>
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Marshal:  <span class="o">{</span><span class="s2">"Id"</span>:<span class="s2">"123"</span>,<span class="s2">"name"</span>:<span class="s2">"aaa"</span>,<span class="s2">"Option1"</span>:<span class="s2">"op111"</span>,<span class="s2">"Time"</span>:<span class="s2">"2018年11月12日 16:52:59"</span><span class="o">}</span>
+Unmarshal: <span class="o">{</span>Id:123 Name:aaa PrivateKey: Option1:op111 Option2: Option3: Time:<span class="o">{</span>wall:0 ext:63677638379 loc:&lt;nil&gt;<span class="o">}}</span>
+</code></pre></div></div>
+
+<h4 id="textmarshaler和textunmarshaler接口">TextMarshaler和TextUnmarshaler接口</h4>
+<p>TextMarshaler与Marshaler类似，优先级比Marshaler低。返回的是文本内容，不需要自己添加双引号。
+上面例子中MyTime的MarshalJSON方法可以使用MarshalText代替：</p>
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>func <span class="o">(</span>t MyTime<span class="o">)</span> MarshalText<span class="o">()</span> <span class="o">([]</span>byte, error<span class="o">)</span> <span class="o">{</span>
+  <span class="k">return</span> <span class="o">[]</span>byte<span class="o">(</span>time.Time<span class="o">(</span>t<span class="o">)</span>.Format<span class="o">(</span><span class="s2">"2006年01月02日 15:04:05"</span><span class="o">))</span>, nil
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>总的来说，我们可以在任意类型上实现上述这四个方法自定义最终的结果，后面的两个方法的适用范围更广，但是不会被 JSON 标准库优先调用。</p>
+
+<h1 id="序列化">序列化</h1>
+<p>我们通过Marshal方法序列化JSON：</p>
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>func Marshal<span class="o">(</span>v interface<span class="o">{})</span> <span class="o">([]</span>byte, error<span class="o">)</span>
+</code></pre></div></div>
+<p>我们通过一个简单示例了解一下使用方法：</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>// 定义一个Message结构体
+<span class="nb">type </span>Message struct <span class="o">{</span>
+    Name string
+    Body string
+    Time int64
+<span class="o">}</span>
+</code></pre></div></div>
+<p>初始化一个Message：</p>
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>message :<span class="o">=</span> Message<span class="o">{</span><span class="s2">"EasyToGo"</span>, <span class="s2">"Hello World"</span>, 1294706395881547000<span class="o">}</span>
+result, err :<span class="o">=</span> json.Marshal<span class="o">(</span>m<span class="o">)</span>
+</code></pre></div></div>
+<p>如果一切运转正常，err会为null；result会是含有JSON数据的[]byte</p>
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">result</span><span class="o">==</span> <span class="o">[]</span>byte<span class="o">(</span><span class="sb">`</span><span class="o">{</span><span class="s2">"Name"</span>:<span class="s2">"EasyToGo"</span>,<span class="s2">"Body"</span>:<span class="s2">"Hello World"</span>,<span class="s2">"Time"</span>:1294706395881547000<span class="o">}</span><span class="sb">`</span><span class="o">)</span>
+</code></pre></div></div>
+<p>只有可以表示为有效 JSON 的数据结构才会被编码：</p>
+
+<p>1.只有 大写字母开头的字段 才会被 JSON 编码/解码如上段代码中的Name、Body、Time。</p>
+
+<p>2.无法对通道，复杂类型和函数类型进行编码。</p>
+
+<p>3.不支持循环数据结构；它们会导致 Marshal 函数陷入无限循环。</p>
+
+<p>4.JSON 对象仅支持将字符串作为键；要编码 Go 集合类型，它必须采用 map[string]T 的形式 (其中 T 是 JSON 程序包支持的任何 Go 类型)。</p>
+
+<p>#反序列化
+为了解码 JSON 数据，我们使用 Unmarshal 函数</p>
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>func Unmarshal<span class="o">(</span>data <span class="o">[]</span>byte, v interface<span class="o">{})</span> error
+</code></pre></div></div>
+
+<p>与执行过程确定的序列化相比，反序列化的过程是逐渐探索的过程，所以会复杂很多，开销也会高出几倍。因为反序列化的使用相对比较繁琐，所以需要传入一个变量帮助标准库进行反序列化：</p>
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>//创建存储解码数据的变量
+var message Message
+err :<span class="o">=</span> json.Unmarshal<span class="o">(</span>result, &amp;message<span class="o">)</span>
+</code></pre></div></div>
+<p>若成功调用</p>
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>message <span class="o">=</span> Message<span class="o">{</span>
+    Name: <span class="s2">"EasyToGo"</span>,
+    Body: <span class="s2">"Hello World"</span>,
+    Time: 1294706395881547000,
+<span class="o">}</span>
+</code></pre></div></div>
+<p>如果JSON 数据的结构与 Go 类型不完全匹配时，Unmarshal 函数将仅解码在目标类型中可以找到的字段：</p>
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>b :<span class="o">=</span> <span class="o">[]</span>byte<span class="o">(</span><span class="sb">`</span><span class="o">{</span><span class="s2">"Name"</span>:<span class="s2">"Michelle"</span>,<span class="s2">"Age"</span>:<span class="s2">"20"</span><span class="o">}</span><span class="sb">`</span><span class="o">)</span>
+var message Message
+err :<span class="o">=</span> json.Unmarshal<span class="o">(</span>result, &amp;message<span class="o">)</span>
+</code></pre></div></div>
+<p>上面代码中，Unmarshal函数只会解码Name字段，age字段将被忽略。</p>
+
+<h2 id="解码任意数据">解码任意数据</h2>
+<p>接下来我们讨论一种常见情况：事先并不知道JSON中的数据格式和字段该怎么办？例如下面这段代码，假定它是一种未知结构，我们应该怎么进行编码/解码呢？</p>
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>b :<span class="o">=</span> <span class="o">[]</span>byte<span class="o">(</span><span class="sb">`</span><span class="o">{</span><span class="s2">"Name"</span>:<span class="s2">"Wednesday"</span>,<span class="s2">"Age"</span>:6,<span class="s2">"Parents"</span>:[<span class="s2">"Gomez"</span>,<span class="s2">"Morticia"</span><span class="o">]}</span><span class="sb">`</span><span class="o">)</span>
+</code></pre></div></div>
+<p>我们可以使用interface{}来进行解码，interface{}为空接口，go的每一种类型都实现了该接口，因此，任何其他类型的数据都可以赋值给interface{}类型。</p>
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>var f interface<span class="o">{}</span>
+// 使用interface<span class="o">{}</span>来进行解码
+err :<span class="o">=</span> json.Unmarshal<span class="o">(</span>b, &amp;f<span class="o">)</span>
+m :<span class="o">=</span> f.<span class="o">(</span>map[string]interface<span class="o">{})</span>
+// 使用 range 语句遍历集合，根据类型的switch语句去获取正确的值。
+<span class="k">for </span>k, v :<span class="o">=</span> range m <span class="o">{</span>
+    switch vv :<span class="o">=</span> v.<span class="o">(</span><span class="nb">type</span><span class="o">)</span> <span class="o">{</span>
+    <span class="k">case</span> string:
+        fmt.Println<span class="o">(</span>k, <span class="s2">"is string"</span>, vv<span class="p">)</span>
+    <span class="k">case</span> float64:
+        fmt.Println<span class="o">(</span>k, <span class="s2">"is float64"</span>, vv<span class="p">)</span>
+    <span class="k">case</span> <span class="o">[]</span>interface<span class="o">{}</span>:
+        fmt.Println<span class="o">(</span>k, <span class="s2">"is an array:"</span><span class="p">)</span>
+        <span class="k">for </span>i, u :<span class="o">=</span> range vv <span class="o">{</span>
+            fmt.Println<span class="o">(</span>i, u<span class="o">)</span>
+        <span class="o">}</span>
+    default:
+        fmt.Println<span class="o">(</span>k, <span class="s2">"is of a type I don't know how to handle"</span><span class="o">)</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h1 id="小结">小结</h1>
+<p>1.JSON是一种树形的数据结构，无论是序列化还是反序列化，都会遵循自顶向下的编码和解码过程，使用递归的方式处理 JSON 对象。</p>
+
+<p>2.作为标准库的 JSON 提供的接口非常简洁，虽然它的性能相比于其他数据格式不算优秀，但是作为框架它提供了很好的通用性。</p>
+
+
+
+                <hr>
+
+                
+
+
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/2019/03/30/password/" data-toggle="tooltip" data-placement="top" title="关于密码的那些事儿">&larr; Previous Post</a>
+                    </li>
+                    
+                    
+                </ul>
+
+
+                
+                <!-- 多说评论框 start -->
+                <div class="comment">
+                    <div class="ds-thread"
+                        data-thread-key="/2022/05/30/JsonInGo"
+                        data-title="GO-序列化之Json"
+                        data-url="http://localhost:4000/2022/05/30/JsonInGo/" >
+                    </div>
+                </div>
+                <!-- 多说评论框 end -->
+                
+
+                
+
+            </div>
+
+    <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+        				
+                            
+                				<a href="/tags/#生活" title="生活" rel="3">
+                                    生活
+                                </a>
+                            
+        				
+        			</div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+                    
+                        <li><a href="http://michellewkx.me">Michelle Blog</a></li>
+                    
+                </ul>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+    // dynamic User by Hux
+    var _user = 'huxblog';
+
+    // duoshuo comment query.
+    var duoshuoQuery = {short_name: _user };
+    (function() {
+        var ds = document.createElement('script');
+        ds.type = 'text/javascript';ds.async = true;
+        ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+        ds.charset = 'UTF-8';
+        (document.getElementsByTagName('head')[0]
+         || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+</script>
+<!-- 多说公共JS代码 end -->
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("http://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                    
+                    
+
+                    <!-- add Weibo, Zhihu by Hux, add target = "_blank" to <a> by Hux -->
+                    
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/michellewkx">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li>
+                        <a target="_blank" href="http://weibo.com/michellewkx">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+
+
+                    
+                    <li>
+                        <a target="_blank" href="https://www.facebook.com/michellewkx">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li>
+                        <a target="_blank" href="https://github.com/michellewkx">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Michelle Daily 2022
+                    <br>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js "></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js "></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js "></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!--
+     Because of the native support for backtick-style fenced code blocks
+     right within the Markdown is landed in Github Pages,
+     From V1.6, There is no need for Highlight.js,
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("http://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-49627206-1';
+    var _gaDomain = 'michellewkx.me';
+
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '4cc1f2d8f3067386cc5cdb626a202900';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>
