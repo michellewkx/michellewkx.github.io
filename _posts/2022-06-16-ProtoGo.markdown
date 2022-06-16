@@ -1,0 +1,310 @@
+---
+layout:     post
+title:      "GO-序列化之Protobuf"
+subtitle:   "Easy to Go"
+date:       2022-06-15 17:00:00
+author:     "Michelle"
+header-img: "img/post-bg-2015.jpg"
+tags:
+- Go语言教程
+---
+
+# google Protobuf
+Protobuf是Protocol Buffers的简称，它是Google公司开发的一种数据描述语言，并于2008年对外开源。
+Protobuf性能和效率大幅度优于JSON、XML等其他的结构化数据格式，是以二进制方式存储的，占用空间小，但也带来了可读性差的缺点。
+我们更关注的是Protobuf作为接口规范的描述语言，可以作为设计安全的跨语言PRC接口的基础工具。
+
+## protobuf入门
+
+### protobuf安装
+官方下载链接：https://github.com/protocolbuffers/protobuf/releases
+如果是linux，可以直接wget
+```shell
+# 下载安装包
+$ wget https://github.com/protocolbuffers/protobuf/releases/download/v3.11.2/protoc-3.11.2-linux-x86_64.zip
+# 解压到 /usr/local 目录下
+$ sudo 7z x protoc-3.11.2-linux-x86_64.zip -o/usr/local
+```
+如果能正常显示版本，则表示安装成功。
+```shell
+$ protoc --version
+libprotoc 3.11.2
+```
+
+###protoc-gen-go
+Go 中使用protobuf还需要安装 protoc-gen-go，这个工具用来将 .proto 文件转换为Go代码。
+```shell
+go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+```
+
+### 编写message
+Protobuf中最基本的数据单元是message，是类似Go语言中结构体的存在。在message中可以嵌套message或其它的基础数据类型的成员。
+接下来，我们创建一个简单的示例 student.proto
+```protobuf
+syntax = "proto3";
+package main;
+
+// student.proto
+message Student {
+  string name = 1;
+  bool male = 2;
+  repeated int32 scores = 3;
+}
+// 输出到当前目录
+option go_package=".";
+```
+对上述代码的解析：
+
+1.开头的syntax语句表示采用proto3的语法,这里是以proto3格式定义。你还可以指定为proto2。
+如果没有指定，默认以proto2格式定义。
+
+2.package，即包名声明符是可选的，用来防止不同的消息类型有命名冲突
+
+3.消息类型 使用 message 关键字定义。name, male, scores 是该类型的 3 个字段，类型分别为 string, bool 和 []int32。repeated 表示字段可重复，即用来表示 Go 语言中的数组类型。
+
+4.每个 = 号后面的数字为标识符，用来在消息体中识别各个字段。
+
+###proto转化为go
+通过以下命令生成相应的Go代码
+```shell
+$ protoc --go_out=. *.proto
+$ ls
+student.pb.go  student.proto
+```
+其中go_out参数告知protoc编译器去加载对应的protoc-gen-go工具，然后通过该工具生成代码，生成代码放到当前目录。最后是一系列要处理的protobuf文件的列表。
+
+我们来看一下生成的go文件
+```shell
+// student.proto
+type Student struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Name   string  `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Male   bool    `protobuf:"varint,2,opt,name=male,proto3" json:"male,omitempty"`
+	Scores []int32 `protobuf:"varint,3,rep,packed,name=scores,proto3" json:"scores,omitempty"`
+}
+
+func (x *Student) Reset() {
+	*x = Student{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_student_proto_msgTypes[0]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *Student) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Student) ProtoMessage() {}
+
+func (x *Student) ProtoReflect() protoreflect.Message {
+	mi := &file_student_proto_msgTypes[0]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Student.ProtoReflect.Descriptor instead.
+func (*Student) Descriptor() ([]byte, []int) {
+	return file_student_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *Student) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+```
+其中ProtoMessage方法表示这是一个实现了proto.Message接口的方法。
+此外Protobuf还为每个成员生成了一个Get方法，Get方法不仅可以处理空指针类型，而且可以和Protobuf第二版的方法保持一致（第二版的自定义默认值特性依赖这类方法）。
+
+## Protobuf 序列化实现详解
+
+本小段将带大家详细了解protobuf的基本序列化实现机制。以下内容以protobufV3版本为例。
+
+### 序列化实现
+
+protobuf序列化的大致流程如下：
+
+![](../images/ch12-serialization-protobuf-flow.png)
+
+
+* 遍历结构体字段，读取字段的标签信息 如： `protobuf:"bytes,1,opt,name=name,proto3"`   字段类型为 bytes 与 tag order 为 1. 这两个值会影响序列化的内容生成
+* 根据字段类型，判断处理的方式。 一共定义6类. 以下是Go语言中定义的方式。可以分成明确长度类型与可变长度类型
+```shell  
+	VarintType     Type = 0 // pb类型: bool enum, int32, sint32, uint32, int64, sint64, sint64, uint64
+	Fixed32Type    Type = 5 // pb类型: sfix32 fix32 float
+	Fixed64Type    Type = 1 // pb类型: sfix64 sfix64 double
+	BytesType      Type = 2 // pb类型: byte数组，string, message结构体, repeat 类型
+	StartGroupType Type = 3 // 较早期能力，使用较少 ，本文不再介绍
+	EndGroupType   Type = 4 // 较早期能力，使用较少 ，本文不再介绍
+```
+
+**明确长度类型**
+
+VarintType, Fixed32Type, Fixed64Type 为明确长度类型， pb写入内容格式如下：
+
+tag(8字节)|值(长度由Go语言类型确定， 后面附有对照表格)
+  ---|---
+uint64|value
+
+例如：以下字段定义
+```shell
+age     int32           `protobuf:"int32,1,opt,name=age,proto3" `
+```
+
+pb序列化后，是一个12字节长度的byte数组
+
+
+**变长类型**
+
+BytesType 为变长类型， b写入内容格式如下：
+
+tag(8字节)| 长度(8字节)| 值(长度由前面的字段确定)
+  ---|---|---
+uint64|uint64|value
+
+例如：以下字段定义 写入pb后，注是一个12字节(Tag 8字节+内容4字节)长度的byte数组
+```shell
+name     string           `protobuf:"bytes,1,opt,name=name,proto3" `
+```
+假如 name="abc”  pb序列化后，是一个19字节(Tag 8字节+长度值 8字节+内容3字节)长度的byte数组
+
+* 生成tag值计算过程
+
+protobuf为了节省空间，想把 tag order与 字段类型保存到一个值内， 思路是 把uint64类型的， 最未3位用于存储类型，其它61 bit用于存储tag order 值。
+
+以下计算Tag的代码实现：
+
+```shell
+// EncodeTag encodes the field Number and wire Type into its unified form.
+func EncodeTag(num Number, typ Type) uint64 {
+	return uint64(num)<<3 | uint64(typ&7)
+}
+```
+
+* 如果是结构体嵌套，则重复执行上面的过程即可。
+
+
+
+### 反序列化实现
+
+了解上面序列化过程后，理解反序列化是非常简单了，大致流程如下：
+* 读取第一个8字节内容(Tag)，如果为0，则表示结束
+* 反解Tag, 获得tag order与类型，
+
+  反解Tag代码如下：
+
+```shell
+// EncodeTag encodes the field Number and wire Type into its unified form.
+func DecodeTag(x uint64) (Number, Type) {
+	// NOTE: MessageSet allows for larger field numbers than normal.
+	if x>>3 > uint64(math.MaxInt32) {
+		return -1, 0
+	}
+	return Number(x >> 3), Type(x & 7)
+}
+
+```
+
+* 根据tag order, 类型读取值的内容
+    * 如果是变长类型，则再读8个字节，读取长度值，根据长度取[]byte值
+    * 如果是明确长度类型，则需要根据order 读取 生成pb 结构体字段对应order的Go语言字段类型， 根据字段类型，计算读取的长度， 根据长度取[]byte值
+    * 通过反射对[]byte值写入到指定字段中。如果是结构体，则重复前二步操作即可。
+
+
+
+### 小结
+
+* protobuf 之所有空间小且快因为只保存了tag(tag order+类型)与值的内容。解析上不需要任何语法辅助。(直接字段段拼接，不用任何分隔符)
+* protobuf的可读性不好，因为没有tag与具体的转换类型，是无法解析里面的内容
+
+
+
+### map类型序列化
+
+protobuf V3 版本开始支持map类型，但他的定义比较特别的，所以单独讲一下它的思路.
+
+map生成的字段如下例所示：
+
+
+```shell 
+type DataMessage struct {
+	mymap map[string]int32 `protobuf:"bytes,2,rep,name=mymap,proto3"  protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"varint,2,opt,name=value,proto3"`
+}
+```
+
+map 属于 BytesType 类型。
+
+* 如果map的key与value 内容是 定长类型，序列化描述如下
+
+tag(8字节)| 某个key value空间长度(8字节)| key tag | key value| value tag | value
+---|---|---|---|---|---
+uint64|uint64|uint64|key value|uint64 |value
+
+备注： 如果map中有多个key，则需要重复上面的内容组合。
+
+
+* 如果map的key与value可内容是变长类型，序列化描述如下
+
+tag(8字节)| 某个key value空间长度(8字节) | key tag | key值长度 | key value| value tag | value 值长度 | value
+---|---|---|---|---|---|---|---
+uint64|uint64|uint64|uint64|key value|uint64 |uint64|value
+
+备注： 如果map中有多个key，则需要重复上面的内容组合。
+
+
+Go语言的这一块代码实现在 codec_map.go文件中
+
+```shell
+func appendMap(b []byte, mapv reflect.Value, mapi *mapInfo, f *coderFieldInfo, opts marshalOptions) ([]byte, error) {
+	if mapv.Len() == 0 {
+		return b, nil
+	}
+	if opts.Deterministic() {
+		return appendMapDeterministic(b, mapv, mapi, f, opts)
+	}
+	iter := mapRange(mapv) // 遍历map
+	for iter.Next() {
+		var err error
+		b = protowire.AppendVarint(b, f.wiretag) // 计算map字段的tag, 写入数组
+		b, err = appendMapItem(b, iter.Key(), iter.Value(), mapi, f, opts) // 写入当前key,value的长度，以及单Key的tag, 值 ，以及value的tag 与值
+		if err != nil {
+			return b, err
+		}
+	}
+	return b, nil
+}
+
+```
+
+#### 补充材料
+
+pb类型与Go语言类型的对照关系：
+
+pb类型 |	说明 |	Go类型 |	长度
+---|---|---|---
+double ||	 	float64	|8
+float	|| 	float32|	4
+int32	|使用变长编码，对于负值的效率很低，如果你的域有可能有负值，请使用sint64替代|	int32	|4
+uint32|	使用变长编码|	uint32|	4
+uint64|	使用变长编码|	uint64|	8
+sint32|	使用变长编码，这些编码在负值时比int32高效的多	|int32|	4
+sint64|	使用变长编码，有符号的整型值。编码时比通常的int64高效。|	int64	|8
+fixed32|	总是4个字节，如果数值总是比总是比228大的话，这个类型会比uint32高效。|	uint32|	4
+fixed64|	总是8个字节，如果数值总是比总是比256大的话，这个类型会比uint64高效。|	uint64|	4
+sfixed32|	总是4个字节	|int32	|4
+sfixed64|	总是8个字节	|int64|	8
+bool	|| 	bool	|1
+string|	一个字符串必须是UTF-8编码或者7-bit ASCII编码的文本。|	string	|变长
+bytes|	可能包含任意顺序的字节数据。|	[]byte	|变长

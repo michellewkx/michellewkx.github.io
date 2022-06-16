@@ -1,12 +1,12 @@
 ---
 layout:     post
 title:      "关于密码的那些事儿"
-subtitle:   " \"Hello World, Hello Blog\""
+subtitle:   "前端开发"
 date:       2019-03-29 17:00:00
 author:     "Michelle"
 header-img: "img/post-bg-2015.jpg"
 tags:
-    - 生活
+    - 前端开发
 ---
 
 
