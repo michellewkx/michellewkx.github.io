@@ -1,4 +1,4 @@
-# Kexin Wang · CV
+# Kathy Wang · CV
 
 The English and Chinese CV share content in `site/content.mjs`, a template in
 `site/build.mjs`, and styles and assets in `site/assets/`. To build and preview

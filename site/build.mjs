@@ -43,12 +43,12 @@ function head(page, title = page.name, missing = false) {
 }
 
 function renderFlow(flow) {
-  const symbols = ['Σ', '▧', '≋'];
+  const symbols = ['≡', '▧', '✓'];
   const wires = '<span></span>'.repeat(flow.agents.length);
   return `
         <figure class="flow" data-flow data-active="0" aria-labelledby="flow-title">
           <div class="flow-top">
-            <a id="flow-title" href="#lasev">${escape(flow.title)}</a>
+            <a id="flow-title" href="#dumate">${escape(flow.title)}</a>
             <button class="flow-replay" type="button" data-flow-replay hidden>
               <span aria-hidden="true">↻</span> ${escape(flow.replay)}
             </button>
