@@ -87,7 +87,7 @@ function createModel() {
     ...grid.slice(1, -1).reverse().map((row) => row[0]),
   ];
   const contours = LEVELS.map((level) => roof.map((triangle) => contour(triangle, level)).filter((line) => line.length === 2));
-  return { roof, rim, contours };
+  return { vertices: grid.flat(), roof, rim, contours };
 }
 
 function createProjection(width, height, yaw, pitch) {
@@ -111,7 +111,7 @@ function trace(ctx, points, close = false) {
   if (close) ctx.closePath();
 }
 
-function fillFacet(ctx, triangle, project, palette) {
+function facetColor(triangle, palette) {
   const [a, b, c] = triangle;
   const dx = b.x - a.x;
   const dz = b.depth - a.depth;
@@ -127,17 +127,14 @@ function fillFacet(ctx, triangle, project, palette) {
   const rgb = palette.floor.map((channel, index) => Math.round(
     interpolate(channel, palette.ridge[index], elevation) + palette.lit[index] * (lighting - .45),
   ));
-  ctx.strokeStyle = ctx.fillStyle = `rgb(${rgb.join(',')})`;
-  ctx.lineWidth = .65;
-  trace(ctx, triangle.map(project), true);
-  ctx.fill();
-  ctx.stroke();
+  return `rgb(${rgb.join(',')})`;
 }
 
-function drawTerrain(ctx, model, project, width, height, palette) {
-  const { roof, rim, contours } = model;
+function drawTerrain(ctx, model, project, width, height, palette, facetColors) {
+  const { vertices, roof, rim, contours } = model;
+  for (const vertex of vertices) vertex.screen = project(vertex);
   const ground = rim.map((point) => project({ ...point, elevation: BASE }));
-  const edge = rim.map(project);
+  const edge = rim.map((point) => point.screen);
 
   ctx.save();
   ctx.shadowColor = palette.mist;
@@ -167,7 +164,18 @@ function drawTerrain(ctx, model, project, width, height, palette) {
     ctx.stroke();
   }
 
-  for (const triangle of roof) fillFacet(ctx, triangle, project, palette);
+  ctx.lineWidth = .65;
+  for (let index = 0; index < roof.length; index++) {
+    const [a, b, c] = roof[index];
+    ctx.strokeStyle = ctx.fillStyle = facetColors[index];
+    ctx.beginPath();
+    ctx.moveTo(a.screen.x, a.screen.y);
+    ctx.lineTo(b.screen.x, b.screen.y);
+    ctx.lineTo(c.screen.x, c.screen.y);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+  }
 
   for (let index = 0; index < contours.length; index++) {
     ctx.beginPath();
@@ -194,6 +202,16 @@ function drawTerrain(ctx, model, project, width, height, palette) {
   ctx.fillRect(0, 0, width, height);
 }
 
+function pointAlongRoute(points, position) {
+  const index = Math.floor(position);
+  const current = points[index];
+  const next = points[Math.min(index + 1, points.length - 1)];
+  return {
+    x: interpolate(current.x, next.x, position - index),
+    y: interpolate(current.y, next.y, position - index),
+  };
+}
+
 function drawRoute(ctx, points, anchors, activeIndex, palette, phase, compact) {
   const start = points[0];
   const end = points.at(-1);
@@ -212,13 +230,15 @@ function drawRoute(ctx, points, anchors, activeIndex, palette, phase, compact) {
   ctx.strokeStyle = gradient;
   ctx.stroke();
   if (phase !== null) {
-    const head = Math.floor(phase * (points.length - 1));
+    const head = phase * (points.length - 1);
     const tail = Math.max(0, head - 12);
     if (head > tail) {
-      const glimmer = ctx.createLinearGradient(points[tail].x, points[tail].y, points[head].x, points[head].y);
+      const from = pointAlongRoute(points, tail);
+      const to = pointAlongRoute(points, head);
+      const glimmer = ctx.createLinearGradient(from.x, from.y, to.x, to.y);
       glimmer.addColorStop(0, 'transparent');
       glimmer.addColorStop(1, '#ffffff');
-      trace(ctx, points.slice(tail, head + 1));
+      trace(ctx, [from, ...points.slice(Math.floor(tail) + 1, Math.ceil(head)), to]);
       ctx.lineWidth = compact ? 2.2 : 2.8;
       ctx.strokeStyle = glimmer;
       ctx.stroke();
@@ -261,6 +281,7 @@ export function createTerrain(canvas, onProject) {
   let resting = { ...angles };
   let target = { ...angles };
   let drag;
+  let directPosePending = false;
   let width = 0;
   let height = 0;
   let scale = 1;
@@ -270,9 +291,12 @@ export function createTerrain(canvas, onProject) {
   let model;
   let layer;
   let layerContext;
+  let terrainPalette;
+  let facetColors;
   let terrainDirty = true;
   let anchors = [];
   let path = [];
+  let project;
 
   function paletteForTheme() {
     const theme = root.dataset.theme;
@@ -281,7 +305,7 @@ export function createTerrain(canvas, onProject) {
 
   function updateProjection() {
     if (!width || !height) return;
-    const project = createProjection(width, height, angles.yaw, angles.pitch);
+    project = createProjection(width, height, angles.yaw, angles.pitch);
     path = route.map(project);
     anchors = stops.map(project);
     onProject(anchors.map(({ x, y }) => ({ x: x / width, y: y / height })));
@@ -309,19 +333,24 @@ export function createTerrain(canvas, onProject) {
     frame = 0;
     if (!visible || document.hidden) return;
     const reduced = motion.matches;
-    if (!reduced && time - lastPaint < 29) {
+    const elapsed = time - lastPaint;
+    const movement = Math.abs(angles.yaw - target.yaw) + Math.abs(angles.pitch - target.pitch);
+    const moving = movement > (directPosePending ? 0 : .001);
+    if (!reduced && !moving && !terrainDirty && elapsed < 29) {
       requestPaint();
       return;
     }
     lastPaint = time;
 
-    if (Math.abs(angles.yaw - target.yaw) + Math.abs(angles.pitch - target.pitch) > .001) {
+    if (moving) {
+      const ease = directPosePending ? 1 : 1 - Math.exp(-Math.min(elapsed, 48) / 56);
       angles = {
-        yaw: interpolate(angles.yaw, target.yaw, .26),
-        pitch: interpolate(angles.pitch, target.pitch, .26),
+        yaw: interpolate(angles.yaw, target.yaw, ease),
+        pitch: interpolate(angles.pitch, target.pitch, ease),
       };
       updateProjection();
     }
+    directPosePending = false;
 
     const palette = paletteForTheme();
     if (!layer) {
@@ -330,10 +359,16 @@ export function createTerrain(canvas, onProject) {
       model = createModel();
     }
     if (terrainDirty) {
-      layer.width = canvas.width;
-      layer.height = canvas.height;
+      if (layer.width !== canvas.width) layer.width = canvas.width;
+      if (layer.height !== canvas.height) layer.height = canvas.height;
+      if (palette !== terrainPalette) {
+        facetColors = model.roof.map((triangle) => facetColor(triangle, palette));
+        terrainPalette = palette;
+      }
+      layerContext.resetTransform();
+      layerContext.clearRect(0, 0, layer.width, layer.height);
       layerContext.setTransform(scale, 0, 0, scale, 0, 0);
-      drawTerrain(layerContext, model, createProjection(width, height, angles.yaw, angles.pitch), width, height, palette);
+      drawTerrain(layerContext, model, project, width, height, palette, facetColors);
       terrainDirty = false;
     }
 
@@ -359,7 +394,8 @@ export function createTerrain(canvas, onProject) {
 
   stage.addEventListener('pointerdown', (event) => {
     if (motion.matches || !event.isPrimary || event.button !== 0 || event.target.closest('button, a, input')) return;
-    drag = { id: event.pointerId, x: event.clientX, y: event.clientY, start: { ...resting }, started: false };
+    target = angles;
+    drag = { id: event.pointerId, x: event.clientX, y: event.clientY, start: angles, started: false };
   });
   stage.addEventListener('pointermove', (event) => {
     if (motion.matches) return;
@@ -372,15 +408,17 @@ export function createTerrain(canvas, onProject) {
         stage.dataset.dragging = '';
         stage.setPointerCapture(event.pointerId);
       }
+      // Positive yaw moves the near edge left, so grab motion uses the opposite sign.
       target = {
-        yaw: clamp(drag.start.yaw + dx / width * .70, -.31, .23),
-        pitch: clamp(drag.start.pitch + dy / height * .27, .63, .89),
+        yaw: clamp(drag.start.yaw - dx / width * .82, -.42, .18),
+        pitch: clamp(drag.start.pitch + dy / height * .43, .63, .89),
       };
+      directPosePending = true;
     } else if (event.pointerType === 'mouse') {
       const bounds = stage.getBoundingClientRect();
       target = {
-        yaw: clamp(resting.yaw + ((event.clientX - bounds.left) / width - .5) * .11, -.32, .24),
-        pitch: clamp(resting.pitch + ((event.clientY - bounds.top) / height - .5) * .10, .62, .90),
+        yaw: clamp(resting.yaw - ((event.clientX - bounds.left) / width - .5) * .08, -.42, .18),
+        pitch: clamp(resting.pitch + ((event.clientY - bounds.top) / height - .5) * .08, .63, .89),
       };
     }
     requestPaint();

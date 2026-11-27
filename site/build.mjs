@@ -149,18 +149,16 @@ function renderPatents(page) {
     year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC',
   });
   return patentGroups.map((group) => {
-    const labels = page.patents.statuses[group.status];
+    const heading = page.patents.statusHeadings[group.status];
     return `
         <section class="patent-group" aria-labelledby="patents-${group.status}">
-          <h3 id="patents-${group.status}">${escape(labels.heading)} <span class="patent-count">${group.records.length}</span></h3>
+          <h3 id="patents-${group.status}">${escape(heading)} <span class="patent-count">${group.records.length}</span></h3>
           <ol class="patent-list" role="list">
             ${group.records.map((patent) => `
             <li class="patent-item" id="patent-${escape(patent.number)}">
-              <time datetime="${escape(patent.date)}">${escape(labels.date)} · ${escape(format.format(new Date(patent.date)))}</time>
-              <div>
-                <h4>${escape(patent[lang])}</h4>
-                <a href="https://patents.google.com/patent/${escape(patent.number)}/zh">${escape(patent.number)}</a>
-              </div>
+              <h4>${escape(patent[lang])}</h4>
+              <time datetime="${escape(patent.date)}">${escape(format.format(new Date(patent.date)))}</time>
+              <a href="https://patents.google.com/patent/${escape(patent.number)}/zh">${escape(patent.number)}</a>
             </li>`).join('')}
           </ol>
         </section>`;
@@ -246,15 +244,15 @@ function renderPage(page, alternate) {
       </div>
     </section>
 
-    <section id="cv" class="shell section-grid" aria-labelledby="cv-title">
+    <section id="cv" class="shell cv-section" aria-labelledby="cv-title">
       <div class="section-heading">
         <h2 id="cv-title">${escape(page.cv.heading)}</h2>
       </div>
-      <ul class="entries experience">${experience}
+      <ul class="experience" role="list">${experience}
       </ul>
     </section>
 
-    <section id="patents" class="shell section-grid patents-section" aria-labelledby="patents-title">
+    <section id="patents" class="shell patents-section" aria-labelledby="patents-title">
       <div class="section-heading">
         <h2 id="patents-title">${escape(page.patents.heading)}</h2>
       </div>

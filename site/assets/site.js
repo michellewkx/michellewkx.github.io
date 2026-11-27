@@ -202,7 +202,7 @@ if (careerMap) {
           stops[index].style.setProperty('--map-x', `${x * 100}%`);
           stops[index].style.setProperty('--map-y', `${y * 100}%`);
         }
-        careerMap.dataset.ready = '';
+        if (!careerMap.hasAttribute('data-ready')) careerMap.dataset.ready = '';
       });
       if (terrain) terrain.setActive(activeIndex);
       else careerMap.dataset.mapUnavailable = '';

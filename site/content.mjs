@@ -141,9 +141,9 @@ export const english = {
   },
   patents: {
     heading: 'Patents',
-    statuses: {
-      granted: { heading: 'Granted patents', date: 'Granted' },
-      published: { heading: 'Published applications', date: 'Published' },
+    statusHeadings: {
+      granted: 'Granted patents',
+      published: 'Published applications',
     },
     otherApplications: 'Two additional filed applications are in examination and have no public document listed.',
   },
@@ -266,9 +266,9 @@ export const chinese = {
   },
   patents: {
     heading: '专利',
-    statuses: {
-      granted: { heading: '已授权', date: '授权' },
-      published: { heading: '已公开申请', date: '公开' },
+    statusHeadings: {
+      granted: '已授权',
+      published: '已公开申请',
     },
     otherApplications: '另有 2 件已提交申请正在审查，暂无可引用的公开文本。',
   },
