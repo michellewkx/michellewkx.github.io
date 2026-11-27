@@ -179,6 +179,8 @@ section[id], article[id], footer[id] { scroll-margin-top: 1.5rem; }
 }
 #dumate .project-gallery { grid-template-columns: minmax(0, 1fr); }
 #dumate .flow { max-width: none; }
+.project:where(#lasev) { grid-template-columns: minmax(0, 1fr) minmax(0, 20rem); }
+#lasev .project-description { max-width: 40rem; }
 .project + .project { margin-top: 2.6rem; padding-top: 2.6rem; border-top: 1px solid var(--line); }
 .project h3 { margin-top: .22rem; font-size: clamp(1.7rem, 3.2vw, 2.6rem); font-weight: 650; letter-spacing: -.045em; }
 .project-description { margin-top: .52rem; color: var(--muted); }
@@ -651,6 +653,7 @@ footer { border-top: 1px solid var(--line); background: light-dark(#f8f6fe, #171
   .profile-details .location::before { content: none; }
   .hero h1, [lang="zh-CN"] .hero h1 { font-size: clamp(2rem, 9.65vw, 4.55rem); }
   .project { grid-template-columns: minmax(0, 1fr); }
+  #lasev .project-media { width: min(100%, 16rem); }
   .project + .project { margin-top: 1.85rem; padding-top: 1.85rem; }
   html[data-js] .timeline-explorer:not([data-map-unavailable]) .timeline-stage { height: clamp(13.75rem, 45vw, 16.875rem); }
   .timeline-card { grid-template-columns: minmax(0, 1fr); }
