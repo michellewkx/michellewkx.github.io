@@ -9,10 +9,10 @@ const links = {
 
 const projectMedia = {
   dumate: {
-    src: '/assets/dumate-desktop.webp',
-    width: 1440,
-    height: 810,
-    source: 'https://bce.bdstatic.com/p3m/common-service/uploads/dumate0323_ec7af94.mp4',
+    src: '/assets/dumate-capabilities.webp',
+    width: 1600,
+    height: 944,
+    source: 'https://now.bdstatic.com/store/v2/d33e0f5/dumate-portal/7dd7541/static/image/tab-process.1b662656.png',
   },
   lasev: {
     src: '/assets/lasev-math-demo.webp',
@@ -56,8 +56,8 @@ export const english = {
         description: 'I lead the agent architecture and algorithm team for DuMate, Baidu’s desktop AI agent. DuMate plans multi-step tasks, selects the relevant skills, and works across applications and files to deliver results.',
         image: {
           ...projectMedia.dumate,
-          alt: 'DuMate desktop app with its task sidebar and a request to create a calendar event.',
-          caption: 'DuMate desktop interface · Baidu product demo',
+          alt: 'Official illustration of DuMate’s knowledge, skills, workflows, and team features.',
+          caption: 'DuMate capabilities · Baidu product site',
         },
         links: [['Product site', links.dumate]],
       },
@@ -132,8 +132,8 @@ export const chinese = {
         description: '负责百度桌面智能体 DuMate 搭子的 Agent 架构和算法团队。DuMate 会拆解多步骤任务、调度相关技能，并跨应用和文件执行、交付结果。',
         image: {
           ...projectMedia.dumate,
-          alt: 'DuMate 桌面界面，左侧是任务栏，输入区已有一条创建日历事件的请求。',
-          caption: 'DuMate 桌面界面 · 百度官方演示',
+          alt: 'DuMate 官方功能图，围绕产品标志展示知识、技能、工作流和团队功能。',
+          caption: 'DuMate 功能介绍 · 百度官网',
         },
         links: [['产品官网', links.dumate]],
       },
