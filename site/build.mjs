@@ -11,6 +11,7 @@ const assetHash = createHash('sha256');
 versionedAssets.forEach((asset) => assetHash.update(asset));
 const assetVersion = assetHash.digest('hex').slice(0, 10);
 const anchors = ['overview', 'work', 'cv', 'contact'];
+const themeOptions = ['system', 'light', 'dark'];
 
 const entities = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' };
 const escape = (value) => value.replace(/[&<>"]/g, (character) => entities[character]);
@@ -25,6 +26,8 @@ function head(page, title = page.name, missing = false) {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#fcfcff" media="not all" data-theme-override>
   <meta name="theme-color" content="#fcfcff" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#101018" media="(prefers-color-scheme: dark)">
   <title>${escape(title)} · CV</title>
@@ -38,6 +41,17 @@ function head(page, title = page.name, missing = false) {
   <meta property="og:title" content="${escape(title)}">
   <meta property="og:description" content="${escape(page.description)}">
   <meta property="og:url" content="${origin}${page.path}">`}
+  <script>
+    try {
+      const storedTheme = localStorage.getItem('cv-theme');
+      if (storedTheme === 'light' || storedTheme === 'dark') {
+        document.documentElement.dataset.theme = storedTheme;
+      }
+    } catch {
+      // Storage may be unavailable. Use the system appearance in that case.
+    }
+  </script>
+  ${missing ? '' : '<link rel="preconnect" href="https://dumate-skill-bos.bj.bcebos.com">'}
   <link rel="icon" href="/assets/mark.png?v=${assetVersion}" type="image/png">
   <link rel="stylesheet" href="/assets/site.css?v=${assetVersion}">
 </head>`;
@@ -77,7 +91,7 @@ function renderProjectImage(image) {
   return `
             <a class="project-media-link" href="${escape(image.source)}" aria-label="${escape(image.caption)}">
               <figure class="project-visual">
-                <img src="${escape(image.src)}" width="${image.width}" height="${image.height}" alt="${escape(image.alt)}" decoding="async">
+                <img src="${escape(image.src)}" width="${image.width}" height="${image.height}" alt="${escape(image.alt)}" decoding="async"${image.fallback ? ` data-image-fallback="${escape(image.fallback)}"` : ''}>
                 <figcaption>${escape(image.caption)}</figcaption>
               </figure>
             </a>`;
@@ -115,6 +129,14 @@ function renderPage(page, alternate) {
         ${renderLinks(page.navigation.map((label, index) => [label, '#' + anchors[index]]))}
       </nav>
       <a class="locale" href="${alternate.path}" lang="${alternate.lang}" hreflang="${alternate.lang}">${page.alternate}</a>
+      <details class="appearance" data-theme-picker hidden>
+        <summary aria-label="${escape(page.theme.label)}" title="${escape(page.theme.label)}">
+          <span class="theme-icon" aria-hidden="true"></span>
+        </summary>
+        <div class="theme-options" role="group" aria-label="${escape(page.theme.label)}">
+          ${themeOptions.map((value, index) => `<button type="button" data-theme-option="${value}" aria-pressed="${index === 0}">${escape(page.theme.choices[index])}</button>`).join('')}
+        </div>
+      </details>
     </div>
   </header>
 

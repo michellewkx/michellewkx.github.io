@@ -9,13 +9,15 @@ const links = {
 
 const projectMedia = {
   dumate: {
-    src: '/assets/dumate-workflow-artwork.webp',
+    src: 'https://dumate-skill-bos.bj.bcebos.com/michellewkx.com/projects/dumate/7cd99789445d-dumate-workflow-artwork.webp',
+    fallback: '/assets/dumate-workflow-artwork.webp',
     width: 944,
     height: 440,
     source: 'https://now.bdstatic.com/store/v2/d33e0f5/dumate-portal/7dd7541/static/image/feature_2.b433666f.png',
   },
   dumateFiles: {
-    src: '/assets/dumate-file-organization.webp',
+    src: 'https://dumate-skill-bos.bj.bcebos.com/michellewkx.com/projects/dumate/b306ad82c33d-dumate-file-organization.webp',
+    fallback: '/assets/dumate-file-organization.webp',
     width: 1240,
     height: 676,
     source: 'https://now.bdstatic.com/store/v2/d33e0f5/dumate-portal/7dd7541/static/image/scenarios_1_1200.18e8b976.png',
@@ -37,6 +39,7 @@ export const english = {
   secondaryName: '王珂欣',
   description: 'Kathy Wang, AI Agent Architect and Algorithm Team Lead at Baidu. Master’s student in Software Engineering at Tsinghua University.',
   navigation: ['Overview', 'Projects', 'CV', 'Contact'],
+  theme: { label: 'Appearance', choices: ['System', 'Light', 'Dark'] },
   location: 'Beijing, China',
   role: 'AI Agent Architect & Algorithm Team Lead',
   affiliation: 'Baidu · DuMate',
@@ -122,6 +125,7 @@ export const chinese = {
   secondaryName: 'Kathy Wang',
   description: '王珂欣，百度 AI Agent 架构师、DuMate 搭子算法团队负责人，清华大学软件工程硕士在读。',
   navigation: ['简介', '项目', '履历', '联系'],
+  theme: { label: '外观', choices: ['跟随系统', '浅色', '暗色'] },
   location: '中国 · 北京',
   role: 'AI Agent 架构师、算法团队负责人',
   affiliation: '百度 · DuMate 搭子',
