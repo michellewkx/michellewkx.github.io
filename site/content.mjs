@@ -38,7 +38,7 @@ export const english = {
   secondaryName: '王珂欣',
   portraitAlt: 'Portrait of Kathy Wang',
   description: 'Kathy Wang, AI Agent Architect and Algorithm Team Lead at Baidu. Master’s student in Software Engineering at Tsinghua University.',
-  navigation: ['Overview', 'Projects', 'Timeline', 'CV', 'Contact'],
+  navigation: ['Overview', 'Timeline', 'Projects', 'CV', 'Contact'],
   theme: { label: 'Appearance', choices: ['System', 'Light', 'Dark'] },
   location: 'Beijing, China',
   role: 'AI Agent Architect & Algorithm Team Lead',
@@ -103,6 +103,7 @@ export const english = {
   },
   timeline: {
     heading: 'Work timeline',
+    rotate: 'Drag to rotate',
     employment: {
       company: 'Baidu',
       tenure: 'Jul 2017 – Present',
@@ -132,7 +133,7 @@ export const english = {
         description: 'Built agent discovery and distribution capabilities, then led core engineering for the Xinxiang consumer task-execution agent.',
       },
       {
-        id: 'earlier', jump: 'Early work', date: 'Earlier work', title: 'Platform engineering',
+        id: 'earlier', jump: 'Early', date: 'Earlier work', title: 'Platform engineering',
         role: 'Backend Lead / Core Engineer',
         description: 'Worked on Baidu’s search resource platform, Smart Mini Programs, and high-concurrency interactions for the Spring Festival Gala.',
       },
@@ -162,7 +163,7 @@ export const chinese = {
   secondaryName: 'Kathy Wang',
   portraitAlt: '王珂欣的照片',
   description: '王珂欣，百度 AI Agent 架构师、DuMate 搭子算法团队负责人，清华大学软件工程硕士在读。',
-  navigation: ['简介', '项目', '时间线', '履历', '联系'],
+  navigation: ['简介', '时间线', '项目', '履历', '联系'],
   theme: { label: '外观', choices: ['跟随系统', '浅色', '暗色'] },
   location: '中国 · 北京',
   role: 'AI Agent 架构师、算法团队负责人',
@@ -227,6 +228,7 @@ export const chinese = {
   },
   timeline: {
     heading: '工作时间线',
+    rotate: '拖动旋转',
     employment: {
       company: '百度',
       tenure: '2017.07 至今',

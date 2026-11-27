@@ -6,12 +6,12 @@ import { patentGroups } from './patents.mjs';
 const origin = 'https://michellewkx.com';
 const assets = new URL('./assets/', import.meta.url);
 const dist = new URL('../dist/', import.meta.url);
-const versionedAssets = await Promise.all(['site.css', 'site.js', 'mark.png']
+const versionedAssets = await Promise.all(['site.css', 'site.js', 'career-map.mjs', 'mark.png']
   .map((name) => readFile(new URL(name, assets))));
 const assetHash = createHash('sha256');
 versionedAssets.forEach((asset) => assetHash.update(asset));
 const assetVersion = assetHash.digest('hex').slice(0, 10);
-const anchors = ['overview', 'work', 'timeline', 'cv', 'contact'];
+const anchors = ['overview', 'timeline', 'work', 'cv', 'contact'];
 const themeOptions = ['system', 'light', 'dark'];
 
 const entities = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' };
@@ -43,6 +43,7 @@ function head(page, title = page.name, missing = false) {
   <meta property="og:description" content="${escape(page.description)}">
   <meta property="og:url" content="${origin}${page.path}">`}
   <script>
+    document.documentElement.dataset.js = '';
     try {
       const storedTheme = localStorage.getItem('cv-theme');
       if (storedTheme === 'light' || storedTheme === 'dark') {
@@ -98,19 +99,48 @@ function renderProjectImage(image) {
             </a>`;
 }
 
-function renderTimeline(entries) {
-  return entries.map((entry) => `
-        <li class="timeline-entry" id="work-${escape(entry.id)}"${entry.current ? ' data-current' : ''}>
-          ${entry.dateTime
-            ? `<time class="timeline-date" datetime="${escape(entry.dateTime)}">${escape(entry.date)}</time>`
-            : `<span class="timeline-date">${escape(entry.date)}</span>`}
-          <article class="timeline-card">
-            <h3>${escape(entry.title)}</h3>
-            <p class="timeline-role">${escape(entry.role)}</p>
-            <p>${escape(entry.description)}</p>
-            ${entry.link ? renderLinks([entry.link]) : ''}
-          </article>
-        </li>`).join('');
+function renderTimeline(timeline) {
+  const { employment } = timeline;
+  const entries = [...timeline.entries].reverse();
+  const stops = entries.map((entry) => `
+              <a class="timeline-stop" href="#work-${escape(entry.id)}" data-career-stop${entry.current ? ' data-current' : ''} aria-label="${escape(`${entry.jump} · ${entry.title}`)}">
+                <span class="timeline-stop-pin" aria-hidden="true"></span>
+                <span class="timeline-stop-label">${escape(entry.jump)}</span>
+              </a>`).join('');
+  const cards = entries.map((entry) => `
+            <article class="timeline-card" id="work-${escape(entry.id)}" data-career-entry>
+              <p class="timeline-date">${escape(entry.date)}</p>
+              <div class="timeline-card-copy">
+                <h3>${escape(entry.title)}</h3>
+                <p class="timeline-role">${escape(entry.role)}</p>
+                <p>${escape(entry.description)}</p>
+              </div>${entry.link ? `
+              <div class="timeline-card-links">${renderLinks([entry.link])}</div>` : ''}
+            </article>`).join('');
+
+  return `
+        <section id="timeline" class="timeline-section" aria-labelledby="timeline-title">
+          <header class="timeline-header">
+            <div class="timeline-heading">
+              <h2 id="timeline-title">${escape(timeline.heading)}</h2>
+              <p class="timeline-tenure">
+                <strong class="timeline-company">${escape(employment.company)}</strong>
+                <span class="timeline-tenure-date">${escape(employment.tenure)}</span>
+                <span class="timeline-tenure-role">${escape(employment.role)}</span>
+              </p>
+            </div>
+          </header>
+          <div class="timeline-explorer" data-career-map data-terrain-module="/assets/career-map.mjs?v=${assetVersion}">
+            <div class="timeline-stage">
+              <canvas class="timeline-terrain" data-career-canvas aria-hidden="true"></canvas>
+              <span class="timeline-map-hint" aria-hidden="true">${escape(timeline.rotate)}</span>
+              <nav class="timeline-stops" data-career-stops aria-labelledby="timeline-title">${stops}
+              </nav>
+            </div>
+            <div class="timeline-details" data-career-details>${cards}
+            </div>
+          </div>
+        </section>`;
 }
 
 function renderPatents(page) {
@@ -138,7 +168,11 @@ function renderPatents(page) {
 }
 
 function renderPage(page, alternate) {
-  const work = page.work.entries.map((entry) => `
+  const work = page.work.entries.map((entry) => {
+    const media = `
+          <div class="project-media${entry.images.length > 1 ? ' project-gallery' : ''}">${entry.images.map(renderProjectImage).join('')}
+          </div>`;
+    return `
         <article class="project" id="${escape(entry.id)}" aria-labelledby="project-${escape(entry.id)}">
           <div class="project-copy">
             <p class="entry-meta">${escape(entry.scope)}</p>
@@ -146,9 +180,10 @@ function renderPage(page, alternate) {
             <p class="project-description">${escape(entry.description)}</p>
             <div class="text-links">${renderLinks(entry.links)}</div>
           </div>
-          <div class="project-media${entry.images.length > 1 ? ' project-gallery' : ''}">${entry.images.map(renderProjectImage).join('')}
-          </div>
-        </article>`).join('');
+          ${entry.id === 'dumate' ? `<div class="project-showcase">${media}${renderFlow(page.flow)}
+          </div>` : media}
+        </article>`;
+  }).join('');
 
   const experience = page.cv.entries.map(([time, institution, role]) => `
         <li class="entry">
@@ -199,7 +234,7 @@ function renderPage(page, alternate) {
           </ul>
           <div class="hero-links">${renderLinks(page.contact.links)}</div>
         </div>
-        ${renderFlow(page.flow)}
+        ${renderTimeline(page.timeline)}
       </div>
     </section>
 
@@ -209,22 +244,6 @@ function renderPage(page, alternate) {
       </div>
       <div class="projects">${work}
       </div>
-    </section>
-
-    <section id="timeline" class="shell section-grid timeline-section" aria-labelledby="timeline-title">
-      <div class="section-heading">
-        <h2 id="timeline-title">${escape(page.timeline.heading)}</h2>
-        <div class="timeline-tenure">
-          <p class="timeline-company">${escape(page.timeline.employment.company)}</p>
-          <p class="timeline-tenure-date">${escape(page.timeline.employment.tenure)}</p>
-          <p>${escape(page.timeline.employment.role)}</p>
-        </div>
-        <nav class="timeline-jump" aria-labelledby="timeline-title">
-          ${renderLinks(page.timeline.entries.map((entry) => [entry.jump, '#work-' + entry.id]))}
-        </nav>
-      </div>
-      <ol class="timeline-list" data-timeline role="list">${renderTimeline(page.timeline.entries)}
-      </ol>
     </section>
 
     <section id="cv" class="shell section-grid" aria-labelledby="cv-title">

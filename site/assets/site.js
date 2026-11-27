@@ -135,13 +135,91 @@ if (flow) {
   }
 }
 
-const workTimeline = document.querySelector('[data-timeline]');
-if (workTimeline && 'IntersectionObserver' in window &&
-    !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-  const visibilityObserver = new IntersectionObserver(([entry]) => {
-    if (!entry.isIntersecting) return;
-    workTimeline.dataset.visible = '';
-    visibilityObserver.disconnect();
-  }, { threshold: .16 });
-  visibilityObserver.observe(workTimeline);
+const careerMap = document.querySelector('[data-career-map]');
+if (careerMap) {
+  const stage = careerMap.querySelector('[data-career-canvas]');
+  const navigation = careerMap.querySelector('[data-career-stops]');
+  const details = careerMap.querySelector('[data-career-details]');
+  const stops = [...navigation.querySelectorAll('[data-career-stop]')];
+  const entries = stops.map((stop) => document.getElementById(stop.hash.slice(1)));
+  const indexFromHash = () => stops.findIndex((stop) => stop.hash === location.hash);
+  let activeIndex;
+  let terrain;
+
+  function selectEntry(index, share = false) {
+    if (index === activeIndex) return;
+    activeIndex = index;
+    if (share) {
+      details.setAttribute('aria-live', 'polite');
+      history.replaceState(history.state, '', stops[index].hash);
+    }
+    for (const [stopIndex, stop] of stops.entries()) {
+      const selected = stopIndex === index;
+      if (selected) stop.setAttribute('aria-current', 'true');
+      else stop.removeAttribute('aria-current');
+      entries[stopIndex].hidden = !selected;
+    }
+    terrain?.setActive(index);
+  }
+
+  const linkedIndex = indexFromHash();
+  selectEntry(linkedIndex < 0 ? stops.findIndex((stop) => stop.hasAttribute('data-current')) : linkedIndex);
+
+  for (const [index, stop] of stops.entries()) {
+    stop.addEventListener('click', (event) => {
+      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      event.preventDefault();
+      selectEntry(index, true);
+    });
+  }
+
+  navigation.addEventListener('keydown', (event) => {
+    const index = stops.indexOf(event.target);
+    if (index < 0 || event.metaKey || event.ctrlKey || event.altKey) return;
+    let nextIndex;
+    switch (event.key) {
+      case 'ArrowLeft': nextIndex = Math.max(0, index - 1); break;
+      case 'ArrowRight': nextIndex = Math.min(stops.length - 1, index + 1); break;
+      case 'Home': nextIndex = 0; break;
+      case 'End': nextIndex = stops.length - 1; break;
+      default: return;
+    }
+    event.preventDefault();
+    selectEntry(nextIndex, true);
+    stops[nextIndex].focus({ preventScroll: true });
+  });
+
+  window.addEventListener('hashchange', () => {
+    const index = indexFromHash();
+    if (index >= 0) selectEntry(index);
+  });
+
+  async function loadTerrain() {
+    try {
+      const { createTerrain } = await import(careerMap.dataset.terrainModule);
+      terrain = createTerrain(stage, (points) => {
+        for (const [index, { x, y }] of points.entries()) {
+          stops[index].style.setProperty('--map-x', `${x * 100}%`);
+          stops[index].style.setProperty('--map-y', `${y * 100}%`);
+        }
+        careerMap.dataset.ready = '';
+      });
+      if (terrain) terrain.setActive(activeIndex);
+      else careerMap.dataset.mapUnavailable = '';
+    } catch {
+      // The linked timeline remains usable when the canvas or its module is unavailable.
+      careerMap.dataset.mapUnavailable = '';
+    }
+  }
+
+  if ('IntersectionObserver' in window) {
+    const visibilityObserver = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return;
+      visibilityObserver.disconnect();
+      void loadTerrain();
+    }, { rootMargin: '240px 0px' });
+    visibilityObserver.observe(careerMap);
+  } else {
+    void loadTerrain();
+  }
 }
