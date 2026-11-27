@@ -606,15 +606,18 @@ html[data-js] .timeline-explorer:not([data-map-unavailable]) .timeline-stage {
 .patent-list { margin: 0; padding: 0; list-style: none; }
 .patent-item {
   display: grid;
-  grid-template-columns: 6.25rem minmax(0, 1fr) max-content;
+  grid-template-columns: minmax(0, 1fr) max-content;
+  grid-template-areas: "title number" "dates dates";
   align-items: baseline;
-  gap: .25rem clamp(.55rem, 1.25vw, .95rem);
+  gap: .15rem clamp(.55rem, 1.25vw, .95rem);
   padding-block: .6rem;
   border-top: 1px solid var(--line);
 }
-.patent-item time { grid-area: 1 / 1; color: var(--muted); font-size: .8125rem; font-variant-numeric: tabular-nums; }
-.patent-item h4 { grid-area: 1 / 2; margin: 0; font: 650 .9375rem/1.44 var(--reading); }
-.patent-item a { grid-area: 1 / 3; font-size: .8125rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+.patent-dates { grid-area: dates; display: flex; flex-wrap: wrap; gap: .1rem .75rem; color: var(--muted); font-size: .8125rem; font-variant-numeric: tabular-nums; }
+.patent-dates span { white-space: nowrap; }
+.patent-dates span:first-child { font-weight: 600; }
+.patent-item h4 { grid-area: title; margin: 0; font: 650 .9375rem/1.44 var(--reading); }
+.patent-item a { grid-area: number; font-size: .8125rem; font-weight: 600; font-variant-numeric: tabular-nums; }
 .text-links { margin-top: .45rem; font-size: .875rem; font-weight: 600; }
 footer { border-top: 1px solid var(--line); background: light-dark(#f8f6fe, #171624); }
 .footer-content { display: flex; align-items: center; justify-content: space-between; gap: 1.2rem 2rem; padding-block: 2rem 2.6rem; }
@@ -673,10 +676,8 @@ footer { border-top: 1px solid var(--line); background: light-dark(#f8f6fe, #171
   .timeline-explorer[data-ready] .timeline-stop-label { padding: .15rem .24rem; }
   .timeline-stop-label { font-size: clamp(.66rem, 2.55vw, .8125rem); }
   .media-dialog, .media-dialog[data-media-portrait] { width: calc(100% - 1rem); max-height: calc(100dvh - 1rem); }
-  .patent-item { grid-template-columns: max-content minmax(0, 1fr); column-gap: .8rem; }
-  .patent-item h4 { grid-area: 1 / 1 / auto / -1; }
-  .patent-item time { grid-area: 2 / 1; }
-  .patent-item a { grid-area: 2 / 2; justify-self: end; }
+  .patent-item { grid-template-areas: "title title" "dates number"; column-gap: .65rem; }
+  .patent-item a { justify-self: end; }
 }
 
 @media (max-width: 24rem) {
@@ -733,11 +734,8 @@ footer { border-top: 1px solid var(--line); background: light-dark(#f8f6fe, #171
   .timeline-card a { min-height: auto; }
   .patent-collections { gap: .6rem; margin-top: .5rem; }
   .patent-group h3 { margin-bottom: .3rem; break-after: avoid; }
-  .patent-item { grid-template-columns: 6.25rem minmax(0, 1fr) max-content; padding-block: .35rem; break-inside: avoid; }
-  .patent-item time { grid-area: 1 / 1; }
-  .patent-item h4 { grid-area: 1 / 2; }
-  .patent-item a { grid-area: 1 / 3; }
-  .patent-item time, .patent-item h4, .patent-item a { font-size: 9pt; }
+  .patent-item { grid-template-areas: "title number" "dates dates"; padding-block: .35rem; break-inside: avoid; }
+  .patent-dates, .patent-item h4, .patent-item a { font-size: 9pt; }
   .entry-meta, .text-links, .footer-links { font-size: 9pt; }
   .text-links { margin-top: .15rem; }
   .text-links a, .footer-links a { min-height: auto; }

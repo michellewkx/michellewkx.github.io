@@ -155,6 +155,7 @@ export const english = {
       granted: 'Granted patents',
       published: 'Published applications',
     },
+    dates: { filed: 'Filed', granted: 'Granted', published: 'Published', rejected: 'Rejection recorded' },
     otherApplications: 'Two additional filed applications are in examination and have no public document listed.',
   },
   contact: {
@@ -288,6 +289,7 @@ export const chinese = {
       granted: '已授权',
       published: '已公开申请',
     },
+    dates: { filed: '申请', granted: '授权', published: '公开', rejected: '驳回记录' },
     otherApplications: '另有 2 件已提交申请正在审查，暂无可引用的公开文本。',
   },
   contact: {

@@ -176,6 +176,7 @@ function renderPatents(page) {
   const format = new Intl.DateTimeFormat(page.lang, {
     year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC',
   });
+  const renderDate = (kind, date) => `<span>${escape(page.patents.dates[kind])} <time datetime="${escape(date)}">${escape(format.format(new Date(date)))}</time></span>`;
   return patentGroups.map((group) => {
     const heading = page.patents.statusHeadings[group.status];
     return `
@@ -185,8 +186,12 @@ function renderPatents(page) {
             ${group.records.map((patent) => `
             <li class="patent-item" id="patent-${escape(patent.number)}">
               <h4>${escape(patent[lang])}</h4>
-              <time datetime="${escape(patent.date)}">${escape(format.format(new Date(patent.date)))}</time>
-              <a href="https://patents.google.com/patent/${escape(patent.number)}/zh">${escape(patent.number)}</a>
+              <div class="patent-dates">
+                ${renderDate('filed', patent.filed)}
+                ${renderDate(group.status, patent.date)}${patent.rejected ? `
+                ${renderDate('rejected', patent.rejected)}` : ''}
+              </div>
+              <a href="${escape(patent.source || `https://patents.google.com/patent/${patent.number}/zh`)}">${escape(patent.number)}</a>
             </li>`).join('')}
           </ol>
         </section>`;
