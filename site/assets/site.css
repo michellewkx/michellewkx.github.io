@@ -620,7 +620,7 @@ html[data-js] .timeline-explorer:not([data-map-unavailable]) .timeline-stage {
 .patent-item a { grid-area: number; font-size: .8125rem; font-weight: 600; font-variant-numeric: tabular-nums; }
 .text-links { margin-top: .45rem; font-size: .875rem; font-weight: 600; }
 footer { border-top: 1px solid var(--line); background: light-dark(#f8f6fe, #171624); }
-.footer-content { display: flex; align-items: center; justify-content: space-between; gap: 1.2rem 2rem; padding-block: 2rem 2.6rem; }
+.footer-content { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .6rem 2rem; padding-block: 2rem 2.6rem; }
 .footer-links { font-size: .9375rem; font-weight: 600; }
 .not-found { display: grid; align-content: center; min-height: 75vh; gap: 1rem; }
 .not-found h1 { font-size: clamp(2.5rem, 7vw, 5rem); letter-spacing: -.07em; }

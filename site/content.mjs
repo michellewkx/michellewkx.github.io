@@ -6,6 +6,9 @@ const links = {
   lasevPaper: 'https://arxiv.org/abs/2602.11790',
 };
 
+const email = 'michellewkx@icloud.com';
+const contactLinks = [['LinkedIn', links.linkedin], ['GitHub', links.github], [email, `mailto:${email}`]];
+
 const projectMedia = {
   dumate: {
     src: 'https://dumate-skill-bos.bj.bcebos.com/michellewkx.com/projects/dumate/7cd99789445d-dumate-workflow-artwork.webp',
@@ -160,7 +163,7 @@ export const english = {
   },
   contact: {
     heading: 'Contact',
-    links: [['LinkedIn', links.linkedin], ['GitHub', links.github]],
+    links: contactLinks,
   },
   missing: { heading: 'Page not found', back: 'Return to the homepage' },
 };
@@ -294,7 +297,7 @@ export const chinese = {
   },
   contact: {
     heading: '联系',
-    links: [['LinkedIn', links.linkedin], ['GitHub', links.github]],
+    links: contactLinks,
   },
   missing: { heading: '页面未找到', back: '返回首页' },
 };
