@@ -5,8 +5,11 @@ import { chinese, english } from './content.mjs';
 const origin = 'https://michellewkx.com';
 const assets = new URL('./assets/', import.meta.url);
 const dist = new URL('../dist/', import.meta.url);
-const style = await readFile(new URL('site.css', assets));
-const styleVersion = createHash('sha256').update(style).digest('hex').slice(0, 10);
+const versionedAssets = await Promise.all(['site.css', 'site.js', 'mark.png']
+  .map((name) => readFile(new URL(name, assets))));
+const assetHash = createHash('sha256');
+versionedAssets.forEach((asset) => assetHash.update(asset));
+const assetVersion = assetHash.digest('hex').slice(0, 10);
 const anchors = ['overview', 'cv', 'work', 'contact'];
 
 const entities = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' };
@@ -22,7 +25,7 @@ function head(page, title = page.name, missing = false) {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#10141c">
+  <meta name="theme-color" content="#f5f8ff">
   <title>${escape(title)} · CV</title>
   <meta name="description" content="${escape(page.description)}">
   ${missing ? '<meta name="robots" content="noindex">' : `
@@ -34,14 +37,44 @@ function head(page, title = page.name, missing = false) {
   <meta property="og:title" content="${escape(title)}">
   <meta property="og:description" content="${escape(page.description)}">
   <meta property="og:url" content="${origin}${page.path}">`}
-  <link rel="icon" href="/assets/mark.png" type="image/png">
-  <link rel="stylesheet" href="/assets/site.css?v=${styleVersion}">
+  <link rel="icon" href="/assets/mark.png?v=${assetVersion}" type="image/png">
+  <link rel="stylesheet" href="/assets/site.css?v=${assetVersion}">
 </head>`;
+}
+
+function renderFlow(flow) {
+  const symbols = ['Σ', '▧', '≋'];
+  const wires = '<span></span>'.repeat(flow.agents.length);
+  return `
+        <figure class="flow" data-flow data-active="0" aria-labelledby="flow-title">
+          <div class="flow-top">
+            <a id="flow-title" href="#lasev">${escape(flow.title)}</a>
+            <button class="flow-replay" type="button" data-flow-replay hidden>
+              <span aria-hidden="true">↻</span> ${escape(flow.replay)}
+            </button>
+          </div>
+          <div class="flow-diagram">
+            <div class="flow-hub">${escape(flow.orchestrator)}</div>
+            <div class="flow-wires" aria-hidden="true">${wires}</div>
+            <div class="flow-agents" role="group" aria-labelledby="flow-title">
+              ${flow.agents.map(([label], index) => `
+                <button type="button" data-flow-step aria-pressed="${index === 0}" disabled>
+                  <span aria-hidden="true">${symbols[index]}</span> ${escape(label)}
+                </button>`).join('')}
+            </div>
+            <div class="flow-wires flow-wires-return" aria-hidden="true">${wires}</div>
+            <div class="flow-output">${escape(flow.output)}</div>
+          </div>
+          <figcaption class="flow-details" aria-live="off">
+            ${flow.agents.map(([, description], index) => `
+              <p data-flow-note${index === 0 ? '' : ' hidden'}>${escape(description)}</p>`).join('')}
+          </figcaption>
+        </figure>`;
 }
 
 function renderPage(page, alternate) {
   const work = page.work.entries.map((entry) => `
-        <article class="entry">
+        <article class="entry"${entry.id ? ` id="${escape(entry.id)}"` : ''}>
           <p class="entry-meta">${escape(entry.scope)}</p>
           <div class="entry-body">
             <h3>${escape(entry.name)}</h3>
@@ -79,13 +112,14 @@ function renderPage(page, alternate) {
           <p class="secondary-name" lang="${alternate.lang}">${escape(page.secondaryName)}</p>
           <h1 id="profile-title">${escape(page.name)}</h1>
           <p class="role">${escape(page.role)}</p>
+          <ul class="profile-details">
+            <li>${escape(page.affiliation)}</li>
+            <li>${escape(page.education)}</li>
+            <li class="location">${escape(page.location)}</li>
+          </ul>
           <div class="hero-links">${renderLinks(page.contact.links)}</div>
         </div>
-        <ul class="profile-details">
-          <li class="location">${escape(page.location)}</li>
-          <li>${escape(page.affiliation)}</li>
-          <li>${escape(page.education)}</li>
-        </ul>
+        ${renderFlow(page.flow)}
       </div>
     </section>
 
@@ -127,7 +161,7 @@ function renderPage(page, alternate) {
       <div class="footer-links">${renderLinks(page.contact.links)}</div>
     </div>
   </footer>
-  <script defer src="/assets/site.js"></script>
+  <script defer src="/assets/site.js?v=${assetVersion}"></script>
 </body>
 </html>
 `;

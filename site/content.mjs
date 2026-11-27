@@ -20,6 +20,17 @@ export const english = {
   role: 'AI Agent Architect & Algorithm Team Lead',
   affiliation: 'Baidu · DuMate',
   education: 'Tsinghua University · Software Engineering',
+  flow: {
+    title: 'LASEV workflow',
+    replay: 'Replay',
+    orchestrator: 'Orchestrating Agent',
+    output: 'Review & assemble',
+    agents: [
+      ['Solve', 'Derive a step-by-step solution to the problem.'],
+      ['Illustrate', 'Generate executable visualizations when they help explain the solution.'],
+      ['Narrate', 'Write narration that follows the solution and illustrations.'],
+    ],
+  },
   work: {
     heading: 'Selected projects',
     entries: [
@@ -30,6 +41,7 @@ export const english = {
         links: [['Product site', links.dumate]],
       },
       {
+        id: 'lasev',
         name: 'LASEV',
         scope: 'Baidu · Sep–Dec 2024',
         description: 'I led algorithm architecture and engineering for Baidu’s educational problem-solving video system. It coordinates solution, executable visualization, and narration agents, with compilation and semantic checks to guide revisions.',
@@ -74,6 +86,17 @@ export const chinese = {
   role: 'AI Agent 架构师、算法团队负责人',
   affiliation: '百度 · DuMate 搭子',
   education: '清华大学 · 软件工程',
+  flow: {
+    title: 'LASEV 多智能体流程',
+    replay: '重播',
+    orchestrator: '编排智能体',
+    output: '校验与合成',
+    agents: [
+      ['解题', '逐步推导，生成可讲解的解题过程。'],
+      ['图示', '按需生成可执行的可视化图示，辅助解释解题过程。'],
+      ['讲解', '撰写与解题步骤和图示对应的旁白。'],
+    ],
+  },
   work: {
     heading: '代表项目',
     entries: [
@@ -84,6 +107,7 @@ export const chinese = {
         links: [['产品官网', links.dumate]],
       },
       {
+        id: 'lasev',
         name: 'LASEV',
         scope: '百度 · 2024.09–2024.12',
         description: '负责百度教育解题视频系统的算法架构与工程落地。系统协调解题、可执行图示和讲解智能体，并用编译检查与语义评审来修正生成结果。',
