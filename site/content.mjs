@@ -52,7 +52,6 @@ export const english = {
   },
   cv: {
     heading: 'Experience & education',
-    print: 'Print CV',
     entries: [
       ['Current', 'Baidu', 'AI Agent Architect & Algorithm Team Lead, DuMate'],
       ['Jul 2024 – Present', 'Tsinghua University', 'Master’s student in Software Engineering · Top 10%'],
@@ -119,7 +118,6 @@ export const chinese = {
   },
   cv: {
     heading: '工作与教育',
-    print: '打印履历',
     entries: [
       ['现任', '百度', 'AI Agent 架构师、算法团队负责人 · DuMate'],
       ['2024.07 至今', '清华大学', '软件工程硕士在读 · 排名前 10%'],

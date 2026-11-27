@@ -126,7 +126,6 @@ function renderPage(page, alternate) {
     <section id="cv" class="shell section-grid" aria-labelledby="cv-title">
       <div class="section-heading">
         <h2 id="cv-title">${escape(page.cv.heading)}</h2>
-        <button class="print" id="print-cv" type="button" hidden>${escape(page.cv.print)}</button>
       </div>
       <ul class="entries experience">${experience}
       </ul>

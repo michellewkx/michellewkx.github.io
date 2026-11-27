@@ -239,8 +239,6 @@ section[id], article[id], footer[id] { scroll-margin-top: 1.5rem; }
 .section-grid { display: grid; grid-template-columns: minmax(0, .38fr) minmax(0, 1fr); align-items: start; gap: 1.35rem clamp(2rem, 5vw, 4.65rem); padding-block: clamp(2.05rem, 4.5vw, 3.5rem); }
 .section-grid + .section-grid { border-top: 1px solid var(--line); }
 .section-heading h2, .footer-content h2 { font-size: clamp(1.55rem, 3vw, 2.13rem); font-weight: 650; letter-spacing: -.04em; }
-.print { display: inline-flex; align-items: center; min-height: 2.75rem; margin-top: .3rem; padding: 0; color: var(--accent); border: 0; background: none; text-decoration: underline; text-underline-offset: .25em; font-size: .875rem; font-weight: 550; cursor: pointer; }
-.print:hover { text-decoration-thickness: 2px; }
 .entries { padding: 0; list-style: none; }
 .entry { display: grid; grid-template-columns: minmax(7.5rem, .34fr) minmax(0, 1fr); gap: .25rem 1.45rem; align-items: baseline; }
 .entry + .entry { margin-top: 1.12rem; padding-top: 1.12rem; border-top: 1px solid var(--line); }
@@ -269,7 +267,6 @@ footer { border-top: 1px solid var(--line); }
   .hero-links { margin-top: 1rem; }
   .section-grid { grid-template-columns: 1fr; gap: .85rem; }
   .section-heading { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: .1rem 1rem; }
-  .print { min-height: 2.75rem; margin: 0; }
   .entry { grid-template-columns: 1fr; }
   .text-links a, .footer-links a { display: inline-flex; align-items: center; min-height: 2.75rem; }
 }
@@ -291,7 +288,7 @@ footer { border-top: 1px solid var(--line); }
   :root { --surface: #fff; --ink: #111; --muted: #333; --line: #b5b5b5; --accent: #111; }
   body { font-size: 10pt; line-height: 1.35; }
   .shell { width: 100%; }
-  .masthead, .skip, .hero-links, .hero::before, .flow, .print { display: none; }
+  .masthead, .skip, .hero-links, .hero::before, .flow { display: none; }
   .hero-inner { display: block; padding-block: 0 .9rem; }
   .hero-identity { animation: none; }
   .hero h1, [lang="zh-CN"] .hero h1 { font-size: 32pt; }
