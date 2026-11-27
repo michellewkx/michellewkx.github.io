@@ -1,9 +1,12 @@
-import { cp, mkdir, rm, writeFile } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
+import { cp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { chinese, english } from './content.mjs';
 
 const origin = 'https://michellewkx.com';
 const assets = new URL('./assets/', import.meta.url);
 const dist = new URL('../dist/', import.meta.url);
+const style = await readFile(new URL('site.css', assets));
+const styleVersion = createHash('sha256').update(style).digest('hex').slice(0, 10);
 const anchors = ['overview', 'cv', 'work', 'contact'];
 
 const entities = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' };
@@ -32,7 +35,7 @@ function head(page, title = page.name, missing = false) {
   <meta property="og:description" content="${escape(page.description)}">
   <meta property="og:url" content="${origin}${page.path}">`}
   <link rel="icon" href="/assets/mark.png" type="image/png">
-  <link rel="stylesheet" href="/assets/site.css">
+  <link rel="stylesheet" href="/assets/site.css?v=${styleVersion}">
 </head>`;
 }
 
