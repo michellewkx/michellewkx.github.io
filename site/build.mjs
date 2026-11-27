@@ -25,7 +25,7 @@ function head(page, title = page.name, missing = false) {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#f5f8ff">
+  <meta name="theme-color" content="#fcfcff">
   <title>${escape(title)} · CV</title>
   <meta name="description" content="${escape(page.description)}">
   ${missing ? '<meta name="robots" content="noindex">' : `
