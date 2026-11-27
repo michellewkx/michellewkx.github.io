@@ -106,8 +106,9 @@ function renderTimeline(entries) {
             : `<span class="timeline-date">${escape(entry.date)}</span>`}
           <article class="timeline-card">
             <h3>${escape(entry.title)}</h3>
+            <p class="timeline-role">${escape(entry.role)}</p>
             <p>${escape(entry.description)}</p>
-            ${renderLinks([entry.link])}
+            ${entry.link ? renderLinks([entry.link]) : ''}
           </article>
         </li>`).join('');
 }
@@ -213,6 +214,11 @@ function renderPage(page, alternate) {
     <section id="timeline" class="shell section-grid timeline-section" aria-labelledby="timeline-title">
       <div class="section-heading">
         <h2 id="timeline-title">${escape(page.timeline.heading)}</h2>
+        <div class="timeline-tenure">
+          <p class="timeline-company">${escape(page.timeline.employment.company)}</p>
+          <p class="timeline-tenure-date">${escape(page.timeline.employment.tenure)}</p>
+          <p>${escape(page.timeline.employment.role)}</p>
+        </div>
         <nav class="timeline-jump" aria-labelledby="timeline-title">
           ${renderLinks(page.timeline.entries.map((entry) => [entry.jump, '#work-' + entry.id]))}
         </nav>
