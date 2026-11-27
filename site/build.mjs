@@ -23,6 +23,7 @@ function renderLinks(links) {
 }
 
 function head(page, title = page.name, missing = false) {
+  const pageTitle = escape(`${title} · Research Profile`);
   return `<!doctype html>
 <html lang="${page.lang}" data-theme="dark">
 <head>
@@ -32,7 +33,7 @@ function head(page, title = page.name, missing = false) {
   <meta name="theme-color" content="#101018" media="all" data-theme-override>
   <meta name="theme-color" content="#fcfcff" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#101018" media="(prefers-color-scheme: dark)">
-  <title>${escape(title)} · CV</title>
+  <title>${pageTitle}</title>
   <meta name="description" content="${escape(page.description)}">
   ${missing ? '<meta name="robots" content="noindex">' : `
   <link rel="canonical" href="${origin}${page.path}">
@@ -40,7 +41,7 @@ function head(page, title = page.name, missing = false) {
   <link rel="alternate" hreflang="zh-CN" href="${origin}/zh/">
   <link rel="alternate" hreflang="x-default" href="${origin}/">
   <meta property="og:type" content="profile">
-  <meta property="og:title" content="${escape(title)}">
+  <meta property="og:title" content="${pageTitle}">
   <meta property="og:description" content="${escape(page.description)}">
   <meta property="og:url" content="${origin}${page.path}">`}
   <script>
