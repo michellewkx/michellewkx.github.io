@@ -47,8 +47,8 @@ section[id], article[id], footer[id] { scroll-margin-top: 1.5rem; }
 .masthead { position: relative; z-index: 2; border-bottom: 1px solid var(--line); background: var(--panel); }
 .masthead-inner { min-height: 4.25rem; display: flex; align-items: center; gap: clamp(1rem, 3vw, 2.6rem); }
 .identity { display: inline-flex; align-items: center; min-height: 2.75rem; margin-right: auto; color: var(--ink); text-decoration: none; }
-.mark { display: inline-flex; align-items: baseline; gap: .22em; color: var(--ink); font: 700 1.1rem/1 var(--display); letter-spacing: -.075em; }
-.mark::after { content: ''; width: .28rem; height: .28rem; background: var(--accent); }
+.mark { display: inline-flex; align-items: baseline; gap: .28em; color: var(--ink); font: 700 1.1rem/1 var(--display); letter-spacing: -.04em; white-space: nowrap; }
+.mark::after { content: ''; flex: none; width: .28rem; height: .28rem; background: var(--accent); }
 .masthead nav { display: flex; align-items: center; gap: clamp(.5rem, 2.75vw, 1.9rem); }
 .masthead nav a, .locale { display: inline-flex; align-items: center; min-height: 2.75rem; color: var(--muted); text-decoration: none; white-space: nowrap; font-size: .875rem; font-weight: 550; }
 .masthead nav a:hover, .locale:hover { color: var(--accent); text-decoration: underline; }

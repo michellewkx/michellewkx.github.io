@@ -230,7 +230,7 @@ function renderPage(page, alternate) {
   <a class="skip" href="#overview">${escape(page.skip)}</a>
   <header class="masthead">
     <div class="shell masthead-inner">
-      <a class="identity" href="${page.path}" aria-label="${escape(page.name)}"><span class="mark" aria-hidden="true">KW</span></a>
+      <a class="identity" href="${page.path}" lang="en"><span class="mark">${escape(english.name)}</span></a>
       <nav aria-label="${page.lang === 'en' ? 'Primary' : '主导航'}">
         ${renderLinks(page.navigation.map((label, index) => [label, '#' + anchors[index]]))}
       </nav>
@@ -316,7 +316,7 @@ function renderNotFound(page) {
   return `${head(page, page.missing.heading, true)}
 <body>
 <main class="shell not-found">
-  <span class="mark" aria-hidden="true">KW</span>
+  <span class="mark" lang="en" aria-hidden="true">${escape(english.name)}</span>
   <h1>${escape(page.missing.heading)}</h1>
   <p><a href="/">${escape(page.missing.back)}</a> <a href="/zh/" lang="zh-CN">返回中文首页</a></p>
 </main>
