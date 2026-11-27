@@ -25,7 +25,8 @@ function head(page, title = page.name, missing = false) {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#fcfcff">
+  <meta name="theme-color" content="#fcfcff" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#101018" media="(prefers-color-scheme: dark)">
   <title>${escape(title)} · CV</title>
   <meta name="description" content="${escape(page.description)}">
   ${missing ? '<meta name="robots" content="noindex">' : `
@@ -46,40 +47,40 @@ function renderFlow(flow) {
   const symbols = ['≡', '▧', '✓'];
   const wires = '<span></span>'.repeat(flow.agents.length);
   return `
-        <details class="project-workflow">
-          <summary id="flow-title">${escape(flow.title)}</summary>
-          <figure class="flow" data-flow data-active="0" aria-labelledby="flow-title">
-            <div class="flow-top">
-              <button class="flow-replay" type="button" data-flow-replay hidden>
-                <span aria-hidden="true">↻</span> ${escape(flow.replay)}
-              </button>
+        <figure class="flow" data-flow data-active="0" aria-labelledby="flow-title">
+          <div class="flow-top">
+            <a id="flow-title" href="#dumate">${escape(flow.title)}</a>
+            <button class="flow-replay" type="button" data-flow-replay hidden>
+              <span aria-hidden="true">↻</span> ${escape(flow.replay)}
+            </button>
+          </div>
+          <div class="flow-diagram">
+            <div class="flow-hub">${escape(flow.orchestrator)}</div>
+            <div class="flow-wires" aria-hidden="true">${wires}</div>
+            <div class="flow-agents" role="group" aria-labelledby="flow-title">
+              ${flow.agents.map(([label], index) => `
+                <button type="button" data-flow-step aria-pressed="${index === 0}" disabled>
+                  <span aria-hidden="true">${symbols[index]}</span> ${escape(label)}
+                </button>`).join('')}
             </div>
-            <div class="flow-diagram">
-              <div class="flow-hub">${escape(flow.orchestrator)}</div>
-              <div class="flow-wires" aria-hidden="true">${wires}</div>
-              <div class="flow-agents" role="group" aria-labelledby="flow-title">
-                ${flow.agents.map(([label], index) => `
-                  <button type="button" data-flow-step aria-pressed="${index === 0}" disabled>
-                    <span aria-hidden="true">${symbols[index]}</span> ${escape(label)}
-                  </button>`).join('')}
-              </div>
-              <div class="flow-wires flow-wires-return" aria-hidden="true">${wires}</div>
-              <div class="flow-output">${escape(flow.output)}</div>
-            </div>
-            <figcaption class="flow-details" aria-live="polite">
-              ${flow.agents.map(([, description], index) => `
-                <p data-flow-note${index === 0 ? '' : ' hidden'}>${escape(description)}</p>`).join('')}
-            </figcaption>
-          </figure>
-        </details>`;
+            <div class="flow-wires flow-wires-return" aria-hidden="true">${wires}</div>
+            <div class="flow-output">${escape(flow.output)}</div>
+          </div>
+          <figcaption class="flow-details" aria-live="off">
+            ${flow.agents.map(([, description], index) => `
+              <p data-flow-note${index === 0 ? '' : ' hidden'}>${escape(description)}</p>`).join('')}
+          </figcaption>
+        </figure>`;
 }
 
 function renderProjectImage(image) {
   return `
-          <figure class="project-visual">
-            <img src="${escape(image.src)}" width="${image.width}" height="${image.height}" alt="${escape(image.alt)}" decoding="async">
-            <figcaption><a href="${escape(image.source)}">${escape(image.caption)}</a></figcaption>
-          </figure>`;
+            <a class="project-media-link" href="${escape(image.source)}" aria-label="${escape(image.caption)}">
+              <figure class="project-visual">
+                <img src="${escape(image.src)}" width="${image.width}" height="${image.height}" alt="${escape(image.alt)}" decoding="async">
+                <figcaption>${escape(image.caption)}</figcaption>
+              </figure>
+            </a>`;
 }
 
 function renderPage(page, alternate) {
@@ -90,9 +91,9 @@ function renderPage(page, alternate) {
             <h3 id="project-${escape(entry.id)}">${escape(entry.name)}</h3>
             <p class="project-description">${escape(entry.description)}</p>
             <div class="text-links">${renderLinks(entry.links)}</div>
-            ${entry.id === 'dumate' ? renderFlow(page.flow) : ''}
           </div>
-          ${renderProjectImage(entry.image)}
+          <div class="project-media${entry.images.length > 1 ? ' project-gallery' : ''}">${entry.images.map(renderProjectImage).join('')}
+          </div>
         </article>`).join('');
 
   const experience = page.cv.entries.map(([time, institution, role]) => `
@@ -123,8 +124,6 @@ function renderPage(page, alternate) {
         <div class="hero-identity">
           <p class="secondary-name" lang="${alternate.lang}">${escape(page.secondaryName)}</p>
           <h1 id="profile-title">${escape(page.name)}</h1>
-        </div>
-        <div class="profile-overview">
           <p class="role">${escape(page.role)}</p>
           <ul class="profile-details">
             <li>${escape(page.affiliation)}</li>
@@ -133,6 +132,7 @@ function renderPage(page, alternate) {
           </ul>
           <div class="hero-links">${renderLinks(page.contact.links)}</div>
         </div>
+        ${renderFlow(page.flow)}
       </div>
     </section>
 

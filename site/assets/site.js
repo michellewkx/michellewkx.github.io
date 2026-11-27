@@ -3,8 +3,11 @@ if (flow) {
   const steps = [...flow.querySelectorAll('[data-flow-step]')];
   const notes = [...flow.querySelectorAll('[data-flow-note]')];
   const replay = flow.querySelector('[data-flow-replay]');
+  const caption = flow.querySelector('figcaption');
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   let timer;
+  let observer;
+  let userInteracted = false;
 
   function selectStep(index) {
     flow.dataset.active = String(index);
@@ -34,14 +37,33 @@ if (flow) {
     playStep(0);
   }
 
+  function takeControl() {
+    userInteracted = true;
+    observer?.disconnect();
+    caption.setAttribute('aria-live', 'polite');
+  }
+
   steps.forEach((step, index) => {
     step.disabled = false;
     step.addEventListener('click', () => {
+      takeControl();
       stopReplay();
       selectStep(index);
     });
   });
 
   replay.hidden = false;
-  replay.addEventListener('click', startReplay);
+  replay.addEventListener('click', () => {
+    takeControl();
+    startReplay();
+  });
+
+  if (!reducedMotion.matches && 'IntersectionObserver' in window) {
+    observer = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return;
+      observer.disconnect();
+      if (!userInteracted && !reducedMotion.matches) startReplay();
+    }, { threshold: .6 });
+    observer.observe(flow);
+  }
 }

@@ -9,10 +9,16 @@ const links = {
 
 const projectMedia = {
   dumate: {
-    src: '/assets/dumate-capabilities.webp',
-    width: 1600,
-    height: 944,
-    source: 'https://now.bdstatic.com/store/v2/d33e0f5/dumate-portal/7dd7541/static/image/tab-process.1b662656.png',
+    src: '/assets/dumate-workflow-artwork.webp',
+    width: 944,
+    height: 440,
+    source: 'https://now.bdstatic.com/store/v2/d33e0f5/dumate-portal/7dd7541/static/image/feature_2.b433666f.png',
+  },
+  dumateFiles: {
+    src: '/assets/dumate-file-organization.webp',
+    width: 1240,
+    height: 676,
+    source: 'https://now.bdstatic.com/store/v2/d33e0f5/dumate-portal/7dd7541/static/image/scenarios_1_1200.18e8b976.png',
   },
   lasev: {
     src: '/assets/lasev-math-demo.webp',
@@ -54,11 +60,18 @@ export const english = {
         name: 'DuMate',
         scope: 'Baidu · Current',
         description: 'I lead the agent architecture and algorithm team for DuMate, Baidu’s desktop AI agent. DuMate plans multi-step tasks, selects the relevant skills, and works across applications and files to deliver results.',
-        image: {
-          ...projectMedia.dumate,
-          alt: 'DuMate Enterprise illustration linking knowledge, systems, teams, and workflows.',
-          caption: 'DuMate Enterprise · Baidu product site',
-        },
+        images: [
+          {
+            ...projectMedia.dumate,
+            alt: 'DuMate logo surrounded by cards for scheduling, code generation, data analysis, and custom skills.',
+            caption: 'Feature overview',
+          },
+          {
+            ...projectMedia.dumateFiles,
+            alt: 'DuMate organizes assorted documents into labeled folders and extracts information.',
+            caption: 'File organization',
+          },
+        ],
         links: [['Product site', links.dumate]],
       },
       {
@@ -66,11 +79,13 @@ export const english = {
         name: 'LASEV',
         scope: 'Baidu · Sep–Dec 2024',
         description: 'I led algorithm architecture and engineering for Baidu’s educational problem-solving video system. It coordinates solution, executable visualization, and narration agents, with compilation and semantic checks to guide revisions.',
-        image: {
-          ...projectMedia.lasev,
-          alt: 'A frame from a LASEV math video, showing a geometric diagram and steps of a proof.',
-          caption: 'Middle-school geometry · LASEV demo',
-        },
+        images: [
+          {
+            ...projectMedia.lasev,
+            alt: 'A frame from a LASEV math video, showing a geometric diagram and steps of a proof.',
+            caption: 'Middle-school geometry · LASEV demo',
+          },
+        ],
         links: [['Project site', links.lasev], ['Related paper', links.lasevPaper]],
       },
     ],
@@ -130,11 +145,18 @@ export const chinese = {
         name: 'DuMate 搭子',
         scope: '百度 · 目前',
         description: '负责百度桌面智能体 DuMate 搭子的 Agent 架构和算法团队。DuMate 会拆解多步骤任务、调度相关技能，并跨应用和文件执行、交付结果。',
-        image: {
-          ...projectMedia.dumate,
-          alt: 'DuMate 企业版功能图，展示知识、系统、团队和工作流。',
-          caption: 'DuMate 企业版功能图 · 百度官网',
-        },
+        images: [
+          {
+            ...projectMedia.dumate,
+            alt: 'DuMate 标志周围展示日程规划、代码生成、数据分析和自定义技能。',
+            caption: '功能概览',
+          },
+          {
+            ...projectMedia.dumateFiles,
+            alt: 'DuMate 将杂乱文件分类归档，并提取文档中的信息。',
+            caption: '文件整理场景',
+          },
+        ],
         links: [['产品官网', links.dumate]],
       },
       {
@@ -142,11 +164,13 @@ export const chinese = {
         name: 'LASEV',
         scope: '百度 · 2024.09–2024.12',
         description: '负责百度教育解题视频系统的算法架构与工程落地。系统协调解题、可执行图示和讲解智能体，并用编译检查与语义评审来修正生成结果。',
-        image: {
-          ...projectMedia.lasev,
-          alt: 'LASEV 数学解题视频画面，包含矩形几何图示和解题步骤。',
-          caption: '初中几何解题 · LASEV 项目演示',
-        },
+        images: [
+          {
+            ...projectMedia.lasev,
+            alt: 'LASEV 数学解题视频画面，包含矩形几何图示和解题步骤。',
+            caption: '初中几何解题 · LASEV 项目演示',
+          },
+        ],
         links: [['项目官网', links.lasev], ['相关论文', links.lasevPaper]],
       },
     ],
