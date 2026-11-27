@@ -13,6 +13,7 @@ if (flow) {
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   let timer;
   let observer;
+  let userInteracted = false;
 
   function selectStep(index) {
     flow.dataset.active = String(index);
@@ -43,6 +44,7 @@ if (flow) {
   }
 
   function takeControl() {
+    userInteracted = true;
     observer?.disconnect();
     caption.setAttribute('aria-live', 'polite');
   }
@@ -66,7 +68,7 @@ if (flow) {
     observer = new IntersectionObserver(([entry]) => {
       if (!entry.isIntersecting) return;
       observer.disconnect();
-      if (!reducedMotion.matches) startReplay();
+      if (!userInteracted && !reducedMotion.matches) startReplay();
     }, { threshold: .6 });
     observer.observe(flow);
   }
