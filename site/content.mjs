@@ -56,8 +56,8 @@ export const english = {
         description: 'I lead the agent architecture and algorithm team for DuMate, Baidu’s desktop AI agent. DuMate plans multi-step tasks, selects the relevant skills, and works across applications and files to deliver results.',
         image: {
           ...projectMedia.dumate,
-          alt: 'Official illustration of DuMate’s knowledge, skills, workflows, and team features.',
-          caption: 'DuMate capabilities · Baidu product site',
+          alt: 'DuMate Enterprise illustration linking knowledge, systems, teams, and workflows.',
+          caption: 'DuMate Enterprise · Baidu product site',
         },
         links: [['Product site', links.dumate]],
       },
@@ -132,8 +132,8 @@ export const chinese = {
         description: '负责百度桌面智能体 DuMate 搭子的 Agent 架构和算法团队。DuMate 会拆解多步骤任务、调度相关技能，并跨应用和文件执行、交付结果。',
         image: {
           ...projectMedia.dumate,
-          alt: 'DuMate 官方功能图，围绕产品标志展示知识、技能、工作流和团队功能。',
-          caption: 'DuMate 功能介绍 · 百度官网',
+          alt: 'DuMate 企业版功能图，展示知识、系统、团队和工作流。',
+          caption: 'DuMate 企业版功能图 · 百度官网',
         },
         links: [['产品官网', links.dumate]],
       },
