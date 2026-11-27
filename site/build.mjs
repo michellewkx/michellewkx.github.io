@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import { cp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { chinese, english } from './content.mjs';
+import { patentGroups } from './patents.mjs';
 
 const origin = 'https://michellewkx.com';
 const assets = new URL('./assets/', import.meta.url);
@@ -10,7 +11,7 @@ const versionedAssets = await Promise.all(['site.css', 'site.js', 'mark.png']
 const assetHash = createHash('sha256');
 versionedAssets.forEach((asset) => assetHash.update(asset));
 const assetVersion = assetHash.digest('hex').slice(0, 10);
-const anchors = ['overview', 'work', 'cv', 'contact'];
+const anchors = ['overview', 'work', 'timeline', 'cv', 'contact'];
 const themeOptions = ['system', 'light', 'dark'];
 
 const entities = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' };
@@ -97,6 +98,44 @@ function renderProjectImage(image) {
             </a>`;
 }
 
+function renderTimeline(entries) {
+  return entries.map((entry) => `
+        <li class="timeline-entry" id="work-${escape(entry.id)}"${entry.current ? ' data-current' : ''}>
+          ${entry.dateTime
+            ? `<time class="timeline-date" datetime="${escape(entry.dateTime)}">${escape(entry.date)}</time>`
+            : `<span class="timeline-date">${escape(entry.date)}</span>`}
+          <article class="timeline-card">
+            <h3>${escape(entry.title)}</h3>
+            <p>${escape(entry.description)}</p>
+            ${renderLinks([entry.link])}
+          </article>
+        </li>`).join('');
+}
+
+function renderPatents(page) {
+  const lang = page.lang === 'en' ? 'en' : 'zh';
+  const format = new Intl.DateTimeFormat(page.lang, {
+    year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC',
+  });
+  return patentGroups.map((group) => {
+    const labels = page.patents.statuses[group.status];
+    return `
+        <section class="patent-group" aria-labelledby="patents-${group.status}">
+          <h3 id="patents-${group.status}">${escape(labels.heading)} <span class="patent-count">${group.records.length}</span></h3>
+          <ol class="patent-list" role="list">
+            ${group.records.map((patent) => `
+            <li class="patent-item" id="patent-${escape(patent.number)}">
+              <time datetime="${escape(patent.date)}">${escape(labels.date)} · ${escape(format.format(new Date(patent.date)))}</time>
+              <div>
+                <h4>${escape(patent[lang])}</h4>
+                <a href="https://patents.google.com/patent/${escape(patent.number)}/zh">${escape(patent.number)}</a>
+              </div>
+            </li>`).join('')}
+          </ol>
+        </section>`;
+  }).join('');
+}
+
 function renderPage(page, alternate) {
   const work = page.work.entries.map((entry) => `
         <article class="project" id="${escape(entry.id)}" aria-labelledby="project-${escape(entry.id)}">
@@ -144,8 +183,13 @@ function renderPage(page, alternate) {
     <section class="hero" aria-labelledby="profile-title">
       <div class="shell hero-inner">
         <div class="hero-identity">
-          <p class="secondary-name" lang="${alternate.lang}">${escape(page.secondaryName)}</p>
-          <h1 id="profile-title">${escape(page.name)}</h1>
+          <div class="profile-heading">
+            <img class="profile-portrait" src="/assets/kathy-wang-portrait.webp" width="512" height="512" alt="${escape(page.portraitAlt)}" decoding="async" fetchpriority="high">
+            <div class="profile-name">
+              <p class="secondary-name" lang="${alternate.lang}">${escape(page.secondaryName)}</p>
+              <h1 id="profile-title">${escape(page.name)}</h1>
+            </div>
+          </div>
           <p class="role">${escape(page.role)}</p>
           <ul class="profile-details">
             <li>${escape(page.affiliation)}</li>
@@ -166,6 +210,17 @@ function renderPage(page, alternate) {
       </div>
     </section>
 
+    <section id="timeline" class="shell section-grid timeline-section" aria-labelledby="timeline-title">
+      <div class="section-heading">
+        <h2 id="timeline-title">${escape(page.timeline.heading)}</h2>
+        <nav class="timeline-jump" aria-labelledby="timeline-title">
+          ${renderLinks(page.timeline.entries.map((entry) => [entry.jump, '#work-' + entry.id]))}
+        </nav>
+      </div>
+      <ol class="timeline-list" data-timeline role="list">${renderTimeline(page.timeline.entries)}
+      </ol>
+    </section>
+
     <section id="cv" class="shell section-grid" aria-labelledby="cv-title">
       <div class="section-heading">
         <h2 id="cv-title">${escape(page.cv.heading)}</h2>
@@ -174,18 +229,14 @@ function renderPage(page, alternate) {
       </ul>
     </section>
 
-    <section class="shell section-grid patent" aria-labelledby="patent-title">
+    <section id="patents" class="shell section-grid patents-section" aria-labelledby="patents-title">
       <div class="section-heading">
-        <h2 id="patent-title">${escape(page.patent.section)}</h2>
+        <h2 id="patents-title">${escape(page.patents.heading)}</h2>
       </div>
-      <article class="entry">
-        <p class="entry-meta">${escape(page.patent.date)}</p>
-        <div class="entry-body">
-          <h3>${escape(page.patent.heading)}</h3>
-          <p>${escape(page.patent.description)}</p>
-          <div class="text-links">${renderLinks([[page.patent.number, page.patent.link]])}</div>
-        </div>
-      </article>
+      <div class="patent-collections">
+        ${renderPatents(page)}
+        <p class="patent-note">${escape(page.patents.otherApplications)}</p>
+      </div>
     </section>
   </main>
 

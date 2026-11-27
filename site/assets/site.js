@@ -134,3 +134,14 @@ if (flow) {
     observer.observe(flow);
   }
 }
+
+const workTimeline = document.querySelector('[data-timeline]');
+if (workTimeline && 'IntersectionObserver' in window &&
+    !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  const visibilityObserver = new IntersectionObserver(([entry]) => {
+    if (!entry.isIntersecting) return;
+    workTimeline.dataset.visible = '';
+    visibilityObserver.disconnect();
+  }, { threshold: .16 });
+  visibilityObserver.observe(workTimeline);
+}

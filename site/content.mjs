@@ -4,7 +4,6 @@ const links = {
   dumate: 'https://www.dumate.cn/',
   lasev: 'https://robitsg.github.io/LASEV/',
   lasevPaper: 'https://arxiv.org/abs/2602.11790',
-  patent: 'https://patents.google.com/patent/CN117312641B/zh',
 };
 
 const projectMedia = {
@@ -37,8 +36,9 @@ export const english = {
   skip: 'Skip to content',
   name: 'Kathy Wang',
   secondaryName: '王珂欣',
+  portraitAlt: 'Portrait of Kathy Wang',
   description: 'Kathy Wang, AI Agent Architect and Algorithm Team Lead at Baidu. Master’s student in Software Engineering at Tsinghua University.',
-  navigation: ['Overview', 'Projects', 'CV', 'Contact'],
+  navigation: ['Overview', 'Projects', 'Timeline', 'CV', 'Contact'],
   theme: { label: 'Appearance', choices: ['System', 'Light', 'Dark'] },
   location: 'Beijing, China',
   role: 'AI Agent Architect & Algorithm Team Lead',
@@ -101,13 +101,38 @@ export const english = {
       ['Undergraduate', 'Xidian University', 'Software Engineering'],
     ],
   },
-  patent: {
-    section: 'Patent',
-    heading: 'Intelligent information acquisition',
-    description: 'Sole named inventor · Assigned to Baidu Online Network Technology (Beijing) Co., Ltd.',
-    date: 'Granted 27 Mar 2026',
-    number: 'CN117312641B',
-    link: links.patent,
+  timeline: {
+    heading: 'Work timeline',
+    entries: [
+      {
+        id: 'current', jump: 'Now', date: 'Present', current: true, title: 'Baidu · DuMate',
+        description: 'AI Agent Architect and Algorithm Team Lead for Baidu’s desktop agent.',
+        link: ['DuMate project', '#dumate'],
+      },
+      {
+        id: '2026', jump: '2026', date: 'Mar 2026', dateTime: '2026-03-27', title: 'Intelligent information acquisition',
+        description: 'Granted a Chinese invention patent as the sole named inventor.',
+        link: ['Patent record', '#patent-CN117312641B'],
+      },
+      {
+        id: '2024', jump: '2024', date: 'Sep–Dec 2024', title: 'Baidu · Educational video agents',
+        description: 'Led algorithm architecture and engineering for a multi-agent educational video system.',
+        link: ['LASEV project', '#lasev'],
+      },
+      {
+        id: '2021', jump: '2021', date: 'May 2021', dateTime: '2021-05-14', title: 'Baidu · Feedback processing',
+        description: 'Filed a feedback-processing invention with Baidu as applicant and later received a grant.',
+        link: ['Patent record', '#patent-CN113238792B'],
+      },
+    ],
+  },
+  patents: {
+    heading: 'Patents',
+    statuses: {
+      granted: { heading: 'Granted patents', date: 'Granted' },
+      published: { heading: 'Published applications', date: 'Published' },
+    },
+    otherApplications: 'Two additional filed applications are in examination and have no public document listed.',
   },
   contact: {
     heading: 'Contact',
@@ -123,8 +148,9 @@ export const chinese = {
   skip: '跳到正文',
   name: '王珂欣',
   secondaryName: 'Kathy Wang',
+  portraitAlt: '王珂欣的照片',
   description: '王珂欣，百度 AI Agent 架构师、DuMate 搭子算法团队负责人，清华大学软件工程硕士在读。',
-  navigation: ['简介', '项目', '履历', '联系'],
+  navigation: ['简介', '项目', '时间线', '履历', '联系'],
   theme: { label: '外观', choices: ['跟随系统', '浅色', '暗色'] },
   location: '中国 · 北京',
   role: 'AI Agent 架构师、算法团队负责人',
@@ -187,13 +213,38 @@ export const chinese = {
       ['本科', '西安电子科技大学', '软件工程'],
     ],
   },
-  patent: {
-    section: '专利',
-    heading: '智能获取信息的方法、装置、设备及存储介质',
-    description: '唯一列名发明人 · 专利权人为百度在线网络技术（北京）有限公司',
-    date: '2026.03.27 授权',
-    number: 'CN117312641B',
-    link: links.patent,
+  timeline: {
+    heading: '工作时间线',
+    entries: [
+      {
+        id: 'current', jump: '目前', date: '目前', current: true, title: '百度 · DuMate 搭子',
+        description: '担任 AI Agent 架构师，负责百度桌面智能体的算法团队。',
+        link: ['DuMate 项目', '#dumate'],
+      },
+      {
+        id: '2026', jump: '2026', date: '2026.03', dateTime: '2026-03-27', title: '智能获取信息专利获授权',
+        description: '作为唯一列名发明人获中国发明专利授权。',
+        link: ['专利记录', '#patent-CN117312641B'],
+      },
+      {
+        id: '2024', jump: '2024', date: '2024.09–12', title: '百度 · 教育解题视频智能体',
+        description: '负责教育解题视频系统的多智能体算法架构和工程落地。',
+        link: ['LASEV 项目', '#lasev'],
+      },
+      {
+        id: '2021', jump: '2021', date: '2021.05', dateTime: '2021-05-14', title: '百度 · 反馈信息处理',
+        description: '以百度为申请人提交反馈信息处理方法发明专利，后获授权。',
+        link: ['专利记录', '#patent-CN113238792B'],
+      },
+    ],
+  },
+  patents: {
+    heading: '专利',
+    statuses: {
+      granted: { heading: '已授权', date: '授权' },
+      published: { heading: '已公开申请', date: '公开' },
+    },
+    otherApplications: '另有 2 件已提交申请正在审查，暂无可引用的公开文本。',
   },
   contact: {
     heading: '联系',
