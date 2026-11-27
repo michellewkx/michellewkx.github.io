@@ -22,10 +22,12 @@ const projectMedia = {
     source: 'https://now.bdstatic.com/store/v2/d33e0f5/dumate-portal/7dd7541/static/image/scenarios_1_1200.18e8b976.png',
   },
   lasev: {
+    type: 'video',
     src: '/assets/lasev-math-demo.webp',
     width: 1440,
     height: 810,
-    source: 'https://robitsg.github.io/LASEV/videos/math_ms_with_illustration.mp4',
+    source: 'https://dumate-skill-bos.bj.bcebos.com/michellewkx.com/projects/lasev/3dfa7b8a1e23-geometry-demo.mp4',
+    sourceFallback: 'https://robitsg.github.io/LASEV/videos/math_ms_with_illustration.mp4',
   },
 };
 
@@ -37,6 +39,14 @@ export const english = {
   name: 'Kathy Wang',
   secondaryName: '王珂欣',
   portraitAlt: 'Portrait of Kathy Wang',
+  media: {
+    close: 'Close preview',
+    previous: 'Previous image',
+    next: 'Next image',
+    originalImage: 'View original image',
+    originalVideo: 'Open video',
+    loadError: 'Preview unavailable. Open the original below.',
+  },
   description: 'Kathy Wang, AI Agent Architect and Algorithm Team Lead at Baidu. Master’s student in Software Engineering at Tsinghua University.',
   navigation: ['Overview', 'Timeline', 'Projects', 'CV', 'Contact'],
   theme: { label: 'Appearance', choices: ['System', 'Light', 'Dark'] },
@@ -162,6 +172,14 @@ export const chinese = {
   name: '王珂欣',
   secondaryName: 'Kathy Wang',
   portraitAlt: '王珂欣的照片',
+  media: {
+    close: '关闭预览',
+    previous: '上一张',
+    next: '下一张',
+    originalImage: '查看原图',
+    originalVideo: '单独打开视频',
+    loadError: '预览加载失败，可以打开下方的原始文件。',
+  },
   description: '王珂欣，百度 AI Agent 架构师、DuMate 搭子算法团队负责人，清华大学软件工程硕士在读。',
   navigation: ['简介', '时间线', '项目', '履历', '联系'],
   theme: { label: '外观', choices: ['跟随系统', '浅色', '暗色'] },

@@ -11,6 +11,7 @@ const versionedAssets = await Promise.all(['site.css', 'site.js', 'career-map.mj
 const assetHash = createHash('sha256');
 versionedAssets.forEach((asset) => assetHash.update(asset));
 const assetVersion = assetHash.digest('hex').slice(0, 10);
+const portrait = '/assets/kathy-wang-portrait.webp';
 const anchors = ['overview', 'timeline', 'work', 'cv', 'contact'];
 const themeOptions = ['system', 'light', 'dark'];
 
@@ -23,12 +24,12 @@ function renderLinks(links) {
 
 function head(page, title = page.name, missing = false) {
   return `<!doctype html>
-<html lang="${page.lang}">
+<html lang="${page.lang}" data-theme="dark">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light dark">
-  <meta name="theme-color" content="#fcfcff" media="not all" data-theme-override>
+  <meta name="theme-color" content="#101018" media="all" data-theme-override>
   <meta name="theme-color" content="#fcfcff" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#101018" media="(prefers-color-scheme: dark)">
   <title>${escape(title)} · CV</title>
@@ -46,11 +47,11 @@ function head(page, title = page.name, missing = false) {
     document.documentElement.dataset.js = '';
     try {
       const storedTheme = localStorage.getItem('cv-theme');
-      if (storedTheme === 'light' || storedTheme === 'dark') {
+      if (storedTheme === 'light' || storedTheme === 'dark' || storedTheme === 'system') {
         document.documentElement.dataset.theme = storedTheme;
       }
     } catch {
-      // Storage may be unavailable. Use the system appearance in that case.
+      // The default appearance still works when storage is unavailable.
     }
   </script>
   ${missing ? '' : '<link rel="preconnect" href="https://dumate-skill-bos.bj.bcebos.com">'}
@@ -90,13 +91,40 @@ function renderFlow(flow) {
 }
 
 function renderProjectImage(image) {
+  const type = image.type || 'image';
   return `
-            <a class="project-media-link" href="${escape(image.source)}" aria-label="${escape(image.caption)}">
+            <a class="project-media-link" href="${escape(image.source)}" aria-label="${escape(image.caption)}" data-media-preview="${type}"${image.sourceFallback ? ` data-media-fallback="${escape(image.sourceFallback)}"` : ''}>
               <figure class="project-visual">
                 <img src="${escape(image.src)}" width="${image.width}" height="${image.height}" alt="${escape(image.alt)}" decoding="async"${image.fallback ? ` data-image-fallback="${escape(image.fallback)}"` : ''}>
                 <figcaption>${escape(image.caption)}</figcaption>
               </figure>
+              <span class="media-preview-icon" aria-hidden="true">${type === 'video' ? '▶' : '⤢'}</span>
             </a>`;
+}
+
+function renderMediaDialog(labels) {
+  return `
+  <dialog class="media-dialog" id="media-preview" data-media-dialog aria-labelledby="media-preview-title">
+    <div class="media-dialog-frame">
+      <header class="media-dialog-header">
+        <h2 id="media-preview-title" data-media-title aria-live="polite"></h2>
+        <button class="media-dialog-button media-dialog-close" type="button" data-media-close aria-label="${escape(labels.close)}" autofocus>×</button>
+      </header>
+      <div class="media-dialog-body">
+        <img data-media-image alt="" hidden>
+        <video data-media-video controls playsinline preload="none" hidden></video>
+        <p class="media-dialog-error" data-media-error role="status" hidden>${escape(labels.loadError)}</p>
+      </div>
+      <div class="media-dialog-footer">
+        <a class="media-dialog-source" data-media-source data-image-label="${escape(labels.originalImage)}" data-video-label="${escape(labels.originalVideo)}" target="_blank" rel="noopener"></a>
+        <div class="media-dialog-controls" data-media-controls hidden>
+          <button class="media-dialog-button" type="button" data-media-prev aria-label="${escape(labels.previous)}">‹</button>
+          <span class="media-dialog-count" data-media-count aria-hidden="true"></span>
+          <button class="media-dialog-button" type="button" data-media-next aria-label="${escape(labels.next)}">›</button>
+        </div>
+      </div>
+    </div>
+  </dialog>`;
 }
 
 function renderTimeline(timeline) {
@@ -207,7 +235,7 @@ function renderPage(page, alternate) {
           <span class="theme-icon" aria-hidden="true"></span>
         </summary>
         <div class="theme-options" role="group" aria-label="${escape(page.theme.label)}">
-          ${themeOptions.map((value, index) => `<button type="button" data-theme-option="${value}" aria-pressed="${index === 0}">${escape(page.theme.choices[index])}</button>`).join('')}
+          ${themeOptions.map((value, index) => `<button type="button" data-theme-option="${value}" aria-pressed="${value === 'dark'}">${escape(page.theme.choices[index])}</button>`).join('')}
         </div>
       </details>
     </div>
@@ -218,7 +246,10 @@ function renderPage(page, alternate) {
       <div class="shell hero-inner">
         <div class="hero-identity">
           <div class="profile-heading">
-            <img class="profile-portrait" src="/assets/kathy-wang-portrait.webp" width="512" height="512" alt="${escape(page.portraitAlt)}" decoding="async" fetchpriority="high">
+            <a class="portrait-link" href="${portrait}" data-media-preview="image" aria-label="${escape(page.portraitAlt)}">
+              <img class="profile-portrait" src="${portrait}" width="512" height="512" alt="${escape(page.portraitAlt)}" decoding="async" fetchpriority="high">
+              <span class="media-preview-icon" aria-hidden="true">⤢</span>
+            </a>
             <div class="profile-name">
               <p class="secondary-name" lang="${alternate.lang}">${escape(page.secondaryName)}</p>
               <h1 id="profile-title">${escape(page.name)}</h1>
@@ -269,6 +300,7 @@ function renderPage(page, alternate) {
       <div class="footer-links">${renderLinks(page.contact.links)}</div>
     </div>
   </footer>
+  ${renderMediaDialog(page.media)}
   <script defer src="/assets/site.js?v=${assetVersion}"></script>
 </body>
 </html>
