@@ -10,7 +10,7 @@ const versionedAssets = await Promise.all(['site.css', 'site.js', 'mark.png']
 const assetHash = createHash('sha256');
 versionedAssets.forEach((asset) => assetHash.update(asset));
 const assetVersion = assetHash.digest('hex').slice(0, 10);
-const anchors = ['overview', 'cv', 'work', 'contact'];
+const anchors = ['overview', 'work', 'cv', 'contact'];
 
 const entities = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' };
 const escape = (value) => value.replace(/[&<>"]/g, (character) => entities[character]);
@@ -46,41 +46,53 @@ function renderFlow(flow) {
   const symbols = ['≡', '▧', '✓'];
   const wires = '<span></span>'.repeat(flow.agents.length);
   return `
-        <figure class="flow" data-flow data-active="0" aria-labelledby="flow-title">
-          <div class="flow-top">
-            <a id="flow-title" href="#dumate">${escape(flow.title)}</a>
-            <button class="flow-replay" type="button" data-flow-replay hidden>
-              <span aria-hidden="true">↻</span> ${escape(flow.replay)}
-            </button>
-          </div>
-          <div class="flow-diagram">
-            <div class="flow-hub">${escape(flow.orchestrator)}</div>
-            <div class="flow-wires" aria-hidden="true">${wires}</div>
-            <div class="flow-agents" role="group" aria-labelledby="flow-title">
-              ${flow.agents.map(([label], index) => `
-                <button type="button" data-flow-step aria-pressed="${index === 0}" disabled>
-                  <span aria-hidden="true">${symbols[index]}</span> ${escape(label)}
-                </button>`).join('')}
+        <details class="project-workflow">
+          <summary id="flow-title">${escape(flow.title)}</summary>
+          <figure class="flow" data-flow data-active="0" aria-labelledby="flow-title">
+            <div class="flow-top">
+              <button class="flow-replay" type="button" data-flow-replay hidden>
+                <span aria-hidden="true">↻</span> ${escape(flow.replay)}
+              </button>
             </div>
-            <div class="flow-wires flow-wires-return" aria-hidden="true">${wires}</div>
-            <div class="flow-output">${escape(flow.output)}</div>
-          </div>
-          <figcaption class="flow-details" aria-live="off">
-            ${flow.agents.map(([, description], index) => `
-              <p data-flow-note${index === 0 ? '' : ' hidden'}>${escape(description)}</p>`).join('')}
-          </figcaption>
-        </figure>`;
+            <div class="flow-diagram">
+              <div class="flow-hub">${escape(flow.orchestrator)}</div>
+              <div class="flow-wires" aria-hidden="true">${wires}</div>
+              <div class="flow-agents" role="group" aria-labelledby="flow-title">
+                ${flow.agents.map(([label], index) => `
+                  <button type="button" data-flow-step aria-pressed="${index === 0}" disabled>
+                    <span aria-hidden="true">${symbols[index]}</span> ${escape(label)}
+                  </button>`).join('')}
+              </div>
+              <div class="flow-wires flow-wires-return" aria-hidden="true">${wires}</div>
+              <div class="flow-output">${escape(flow.output)}</div>
+            </div>
+            <figcaption class="flow-details" aria-live="polite">
+              ${flow.agents.map(([, description], index) => `
+                <p data-flow-note${index === 0 ? '' : ' hidden'}>${escape(description)}</p>`).join('')}
+            </figcaption>
+          </figure>
+        </details>`;
+}
+
+function renderProjectImage(image) {
+  return `
+          <figure class="project-visual">
+            <img src="${escape(image.src)}" width="${image.width}" height="${image.height}" alt="${escape(image.alt)}" decoding="async">
+            <figcaption><a href="${escape(image.source)}">${escape(image.caption)}</a></figcaption>
+          </figure>`;
 }
 
 function renderPage(page, alternate) {
   const work = page.work.entries.map((entry) => `
-        <article class="entry"${entry.id ? ` id="${escape(entry.id)}"` : ''}>
-          <p class="entry-meta">${escape(entry.scope)}</p>
-          <div class="entry-body">
-            <h3>${escape(entry.name)}</h3>
-            <p>${escape(entry.description)}</p>
+        <article class="project" id="${escape(entry.id)}" aria-labelledby="project-${escape(entry.id)}">
+          <div class="project-copy">
+            <p class="entry-meta">${escape(entry.scope)}</p>
+            <h3 id="project-${escape(entry.id)}">${escape(entry.name)}</h3>
+            <p class="project-description">${escape(entry.description)}</p>
             <div class="text-links">${renderLinks(entry.links)}</div>
+            ${entry.id === 'dumate' ? renderFlow(page.flow) : ''}
           </div>
+          ${renderProjectImage(entry.image)}
         </article>`).join('');
 
   const experience = page.cv.entries.map(([time, institution, role]) => `
@@ -111,6 +123,8 @@ function renderPage(page, alternate) {
         <div class="hero-identity">
           <p class="secondary-name" lang="${alternate.lang}">${escape(page.secondaryName)}</p>
           <h1 id="profile-title">${escape(page.name)}</h1>
+        </div>
+        <div class="profile-overview">
           <p class="role">${escape(page.role)}</p>
           <ul class="profile-details">
             <li>${escape(page.affiliation)}</li>
@@ -119,7 +133,14 @@ function renderPage(page, alternate) {
           </ul>
           <div class="hero-links">${renderLinks(page.contact.links)}</div>
         </div>
-        ${renderFlow(page.flow)}
+      </div>
+    </section>
+
+    <section id="work" class="shell work" aria-labelledby="work-title">
+      <div class="section-heading">
+        <h2 id="work-title">${escape(page.work.heading)}</h2>
+      </div>
+      <div class="projects">${work}
       </div>
     </section>
 
@@ -129,14 +150,6 @@ function renderPage(page, alternate) {
       </div>
       <ul class="entries experience">${experience}
       </ul>
-    </section>
-
-    <section id="work" class="shell section-grid" aria-labelledby="work-title">
-      <div class="section-heading">
-        <h2 id="work-title">${escape(page.work.heading)}</h2>
-      </div>
-      <div class="entries">${work}
-      </div>
     </section>
 
     <section class="shell section-grid patent" aria-labelledby="patent-title">
