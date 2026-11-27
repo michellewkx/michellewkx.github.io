@@ -1,7 +1,7 @@
 # Kexin Wang · CV
 
 The English and Chinese CV share content in `site/content.mjs`, a template in
-`site/build.mjs`, and styles and artwork in `site/assets/`. To build and preview
+`site/build.mjs`, and styles and assets in `site/assets/`. To build and preview
 locally with Node.js 18+ and Python 3:
 
 ```sh
